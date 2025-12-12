@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SQUEAKY G: ORIGIN OF THE GLITCH – Crumbs in the Wires</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ----
+       GLOBAL RESET & BASE
+       ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main: #020214;
+      --bg-alt: #050518;
+      --accent-violet: #c43bff;
+      --accent-green: #35ff9b;
+      --accent-aqua: #33e9ff;
+      --accent-yellow: #fffb88;
+      --text-primary: #f5f7ff;
+      --text-muted: #8ba0c9;
+      --danger: #ff4f6a;
+      --border-glow: rgba(115, 255, 224, 0.6);
+      --shadow-strong: 0 0 24px rgba(0, 255, 204, 0.6);
+      --shadow-soft: 0 0 40px rgba(196, 59, 255, 0.4);
+      --transition-fast: 0.2s ease-out;
+      --transition-med: 0.45s ease-out;
+    }
+
+    html, body {
+      height: 100%;
+      background: radial-gradient(circle at top, #12002b 0, #020214 40%, #00006 100%);
+      color: var(--text-primary);
+      font-family: "Orbitron", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body { position: relative; }
+
+    /* STARFIELD / PARTICLE BACKGROUND */
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(196, 59, 255, 0.2), transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(51, 233, 255, 0.18), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.9;
+    }
+
+    body::after {
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 80% 70%, rgba(53,255,155,0.7), transparent),
+        radial-gradient(1.2px 1.2px at 30% 90%, rgba(196,59,255,0.9), transparent),
+        radial-gradient(1.2px 1.2px at 60% 30%, rgba(51,233,255,0.7), transparent);
+      animation: starfieldDrift 50s linear infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes starfieldDrift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-60px, -40px, 0) scale(1.1); }
+      100% { transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    /* ----
+       LOADING SCREEN
+       ---- */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, #3b006b 0, #020214 55%, #000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    .loading-logo {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-align: center;
+      position: relative;
+      padding: 1.2rem 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 32px rgba(196, 59, 255, 0.7), 0 0 70px rgba(51, 233, 255, 0.5);
+      background: linear-gradient(120deg, rgba(0,0,0,0.8), rgba(8,8,20,0.95));
+      overflow: hidden;
+    }
+
+    .loading-logo::before, .loading-logo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .loading-logo::before {
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.18),
+        rgba(255,255,255,0.18) 1px,
+        transparent 2px,
+        transparent 3px
+      );
+      opacity: 0.25;
+      animation: scanline 3.2s linear infinite;
+    }
+
+    .loading-logo::after {
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(255,255,255,0.12) 40%,
+        rgba(255,255,255,0.35) 50%,
+        rgba(255,255,255,0.12) 60%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      animation: lightSweep 2.8s ease-in-out infinite;
+    }
+
+    .loading-sub {
+      margin-top: 1.4rem;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
+    }
+
+    .loading-bar {
+      margin-top: 1.5rem;
+      width: 220px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      border-radius: 999px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+    }
+
+    .loading-bar-inner {
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-aqua), var(--accent-green));
+      animation: loadPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+    @keyframes lightSweep {
+      0% { transform: translateX(-130%) skewX(-10deg); }
+      55% { transform: translateX(110%) skewX(-10deg); }
+      100% { transform: translateX(110%) skewX(-10deg); }
+    }
+    @keyframes loadPulse {
+      0%, 100% { transform: translateX(-10%); opacity: 0.6; }
+      50% { transform: translateX(70%); opacity: 1; }
+    }
+
+    .glitch-text { position: relative; display: inline-block; animation: glitchMain 2.6s infinite; }
+    .glitch-text::before, .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 55%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    .glitch-text::before {
+      color: var(--accent-aqua);
+      transform: translate(1px, -1px);
+      mix-blend-mode: screen;
+      animation: glitchSub1 1.7s infinite;
+    }
+    .glitch-text::after {
+      color: var(--accent-violet);
+      transform: translate(-1px, 1px);
+      mix-blend-mode: screen;
+      animation: glitchSub2 1.7s infinite;
+    }
+    @keyframes glitchMain {
+      0% { transform: none; }
+      20% { transform: skew(-1deg); }
+      22% { transform: none; }
+      40% { transform: skew(1.2deg); }
+      41% { transform: none; }
+      60% { transform: translateX(1px); }
+      61% { transform: none; }
+      100% { transform: none; }
+    }
+    @keyframes glitchSub1 {
+      0%, 100% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 55%); }
+      50% { clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0 100%); }
+    }
+    @keyframes glitchSub2 {
+      0%, 100% { clip-path: polygon(0 55%, 100% 45%, 100% 100%, 0 100%); }
+      50% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 55%); }
+    }
+
+    /* ----
+       HEADER & GLOBAL CHROME
+       ---- */
+    header.site-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+      background: linear-gradient(to bottom, rgba(1,1,12,0.92), rgba(1,1,12,0.7), transparent);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(115, 255, 224, 0.18);
+    }
+
+    .site-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .logo-orb {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: conic-gradient(from 180deg, var(--accent-violet), var(--accent-aqua), var(--accent-green), var(--accent-violet));
+      box-shadow: 0 0 18px rgba(51, 233, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo-orb::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: inherit;
+      border: 1px solid rgba(0,0,0,0.8);
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), transparent 50%);
+      mix-blend-mode: screen;
+      opacity: 0.9;
+    }
+
+    .logo-text-main {
+      font-size: 0.95rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(196, 59, 255, 0.7);
+    }
+
+    .logo-text-sub {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      color: var(--accent-aqua);
+      letter-spacing: 0.25em;
+      font-family: "Share Tech Mono", monospace;
+    }
+
+    .header-controls { display: flex; align-items: center; gap: 0.75rem; }
+
+    .ambient-toggle {
+      border: 1px solid rgba(115, 255, 224, 0.5);
+      background: rgba(1,1,16,0.85);
+      padding: 0.38rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), color var(--transition-fast);
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .ambient-toggle span.icon {
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, var(--accent-green), rgba(0,0,0,0.9));
+      box-shadow: 0 0 12px rgba(53, 255, 155, 0.95);
+    }
+
+    .ambient-toggle.muted { color: var(--text-muted); border-color: rgba(255, 255, 255, 0.15); }
+    .ambient-toggle.muted span.icon { background: radial-gradient(circle at 30% 20%, #888, rgba(0,0,0,0.9)); box-shadow: 0 0 3px rgba(255,255,255,0.4); }
+
+    .ambient-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-strong);
+      background: linear-gradient(120deg, rgba(0,0,0,0.8), rgba(10,40,40,0.9));
+    }
+
+    .nav-link-minimal {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: all var(--transition-fast);
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-link-minimal:hover {
+      color: var(--accent-aqua);
+      border-color: rgba(53,255,155,0.8);
+      box-shadow: 0 0 18px rgba(53,255,155,0.6);
+      transform: translateY(-1px);
+    }
+
+    main { padding-top: 64px; }
+
+    /* ----
+       SECTION LAYOUT (ROUTED "PAGES")
+       ---- */
+    section.route-section {
+      min-height: calc(100vh - 64px);
+      padding: 3.5rem 5vw 3.5rem;
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity var(--transition-med), transform var(--transition-med);
+    }
+
+    section.route-section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .content-frame {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: radial-gradient(circle at top, rgba(17, 19, 54, 0.85), rgba(3, 3, 10, 0.95));
+      border-radius: 24px;
+      padding: 2.4rem 2.3rem;
+      border: 1px solid rgba(115, 255, 224, 0.2);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        0 0 32px rgba(0, 0, 0, 0.9),
+        0 0 72px rgba(196, 59, 255, 0.55);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(196,59,255,0.12), transparent 40%, rgba(51,233,255,0.12) 60%, transparent 80%),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,0.05),
+          rgba(255,255,255,0.05) 1px,
+          transparent 2px,
+          transparent 3px
+        );
+      mix-blend-mode: soft-light;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .content-inner { position: relative; z-index: 1; }
+
+    h1.page-title {
+      font-size: clamp(1.9rem, 4vw, 2.6rem);
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 18px rgba(196, 59, 255, 0.9);
+    }
+
+    h2.section-subtitle {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.26em;
+      color: var(--accent-aqua);
+      margin-bottom: 1.8rem;
+      font-family: "Share Tech Mono", monospace;
+    }
+
+    h3 {
+      margin: 1.8rem 0 0.7rem;
+      font-size: 1.05rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-green);
+    }
+
+    p, li {
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    ul { padding-left: 1.2rem; margin-top: 0.4rem; }
+    strong { color: var(--accent-yellow); }
+
+    .tagline-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: linear-gradient(120deg, rgba(0,0,0,0.9), rgba(30,0,40,0.9));
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-yellow);
+      margin-bottom: 1.2rem;
+      box-shadow: 0 0 14px rgba(255, 251, 136, 0.4);
+    }
+
+    /* ASCII GLITCH DIVIDER */
+    .ascii-glitch {
+      margin: 1.6rem 0;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.62rem;
+      color: var(--accent-aqua);
+      opacity: 0.9;
+      white-space: pre-wrap;
+    }
+
+    /* ----
+       STORY / SCRIPT LAYOUT
+       ---- */
+    .script-section { margin-top: 0.8rem; }
+
+    .panel-list { list-style: none; margin-top: 0.4rem; }
+
+    .panel-item {
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px dashed rgba(45,86,120,0.7);
+    }
+    .panel-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .panel-heading {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 0.3rem;
+      color: var(--accent-aqua);
+    }
+
+    .panel-meta { font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+
+    .panel-dialog {
+      margin-top: 0.25rem;
+      padding-left: 0.7rem;
+      border-left: 2px solid rgba(196,59,255,0.7);
+    }
+    .panel-dialog p { margin-bottom: 0.2rem; }
+    .panel-dialog span.character { color: var(--accent-yellow); }
+
+    .script-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-violet);
+      margin-bottom: 0.35rem;
+    }
+
+    .beats-list { margin-top: 0.35rem; padding-left: 1.2rem; }
+    .beats-list li { margin-bottom: 0.25rem; }
+
+    /* ----
+       RESPONSIVE LOCAL IMAGE EMBEDS (fit to size + zoomable)
+       ---- */
+    figure.scene-figure {
+      margin: 1.2rem 0 1.4rem;
+      border-radius: 18px;
+      border: 1px solid rgba(115, 255, 224, 0.35);
+      background: radial-gradient(circle at top left, rgba(10,80,80,0.35), rgba(0,0,0,0.9));
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+
+    figure.scene-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+      background: rgba(0,0,0,0.35);
+      cursor: zoom-in;
+      transition: opacity 0.2s ease-out;
+    }
+
+    figure.scene-figure img:hover {
+      opacity: 0.92;
+    }
+
+    figure.scene-figure figcaption {
+      padding: 0.8rem 1rem 1rem;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .panel-art {
+      margin: 0.55rem 0 0.55rem;
+      border-radius: 14px;
+      border: 1px solid rgba(196,59,255,0.28);
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(196,59,255,0.18);
+      background: rgba(0,0,0,0.35);
+    }
+
+    .panel-art img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+      cursor: zoom-in;
+      transition: opacity 0.2s ease-out;
+    }
+
+    .panel-art img:hover {
+      opacity: 0.92;
+    }
+
+    .panel-art-note {
+      padding: 0.55rem 0.75rem 0.75rem;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.72rem;
+      color: rgba(139,160,201,0.95);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      background: linear-gradient(120deg, rgba(0,0,0,0.65), rgba(12,0,30,0.65));
+    }
+
+    /* Optional: keep very tall panels from feeling endless on desktop */
+    @media (min-width: 920px) {
+      .panel-art img { max-height: 820px; }
+      figure.scene-figure img { max-height: 760px; }
+    }
+
+    /* ----
+       LIGHTBOX (CLICK-TO-ZOOM)
+       ---- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 4vh 4vw;
+      background: radial-gradient(circle at 20% 10%, rgba(196,59,255,0.25), rgba(0,0,0,0.92) 55%, rgba(0,0,0,0.98) 100%);
+      backdrop-filter: blur(10px);
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox-panel {
+      width: min(1600px, 96vw);
+      max-height: 92vh;
+      border-radius: 18px;
+      border: 1px solid rgba(115,255,224,0.45);
+      box-shadow: 0 0 28px rgba(51,233,255,0.35), 0 0 60px rgba(196,59,255,0.35);
+      overflow: hidden;
+      background: rgba(0,0,0,0.65);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lightbox-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(120deg, rgba(0,0,0,0.75), rgba(12,0,30,0.65));
+      flex-shrink: 0;
+    }
+
+    .lightbox-title {
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.78);
+    }
+
+    .lightbox-close {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.35);
+      color: rgba(255,255,255,0.78);
+      border-radius: 999px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease-out, color 0.15s ease-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+    }
+
+    .lightbox-close:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,79,106,0.85);
+      color: var(--danger);
+      box-shadow: 0 0 18px rgba(255,79,106,0.6);
+    }
+
+    .lightbox-media {
+      flex: 1;
+      overflow: auto;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .lightbox-caption {
+      padding: 0.8rem 1rem 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: linear-gradient(120deg, rgba(0,0,0,0.75), rgba(2,20,26,0.55));
+      flex-shrink: 0;
+    }
+
+    /* Stop body scroll while lightbox open */
+    body.lb-open { overflow: hidden; }
+
+    /* ----
+       NAVIGATION BUTTONS (NEXT / PREV / RETURN)
+       ---- */
+    .scene-nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 2.2rem;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .scene-nav-left, .scene-nav-right { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    .holo-btn {
+      position: relative;
+      border-radius: 999px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border: 1px solid rgba(115,255,224,0.7);
+      background: radial-gradient(circle at top, rgba(0,0,0,0.9), rgba(4,20,26,0.9));
+      color: var(--accent-aqua);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+      box-shadow: 0 0 16px rgba(0,0,0,0.8);
+    }
+
+    .holo-btn span.chevron { font-size: 0.8rem; opacity: 0.85; }
+
+    .holo-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-120%);
+      transition: transform 0.6s ease-out;
+      mix-blend-mode: screen;
+      opacity: 0;
+    }
+
+    .holo-btn:hover {
+      transform: translateY(-1px) translateZ(0);
+      box-shadow: var(--shadow-strong);
+      color: var(--accent-green);
+      border-color: rgba(53,255,155,0.9);
+      background: radial-gradient(circle at top, rgba(0,0,0,0.9), rgba(0,60,40,0.9));
+    }
+
+    .holo-btn:hover::before { transform: translateX(130%); opacity: 1; }
+
+    .holo-btn.secondary { border-color: rgba(196,59,255,0.8); color: var(--accent-violet); }
+    .holo-btn.secondary:hover {
+      border-color: rgba(255,251,136,0.9);
+      color: var(--accent-yellow);
+      box-shadow: 0 0 24px rgba(196,59,255,0.9);
+      background: radial-gradient(circle at top, rgba(10,0,20,0.96), rgba(40,0,70,0.96));
+    }
+
+    .holo-btn.small { padding: 0.4rem 0.9rem; font-size: 0.68rem; }
+
+    /* ----
+       3D HOLOGRAPHIC NAVIGATION WHEEL (#nav)
+       ---- */
+    .nav-wheel-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+    }
+
+    .nav-wheel-scene-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+    }
+
+    .nav-wheel {
+      width: min(420px, 80vw);
+      height: min(420px, 80vw);
+      border-radius: 50%;
+      position: relative;
+      perspective: 1200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-wheel-core {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(115,255,224,0.4);
+      box-shadow: 0 0 26px rgba(51,233,255,0.8), inset 0 0 40px rgba(196,59,255,0.6);
+      background: radial-gradient(circle at top, rgba(0,0,0,0.7), rgba(0,0,0,0.98));
+      transform-style: preserve-3d;
+      animation: wheelRotate 26s linear infinite;
+    }
+
+    .nav-wheel:hover .nav-wheel-core { animation-play-state: paused; }
+
+    @keyframes wheelRotate {
+      0% { transform: rotateX(22deg) rotateZ(0deg); }
+      100% { transform: rotateX(22deg) rotateZ(360deg); }
+    }
+
+    .nav-node {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 110px; height: 38px;
+      margin: -19px 0 0 -55px;
+      transform-origin: 50% calc(50% + 140px);
+      transform-style: preserve-3d;
+    }
+
+    .nav-node a {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(115,255,224,0.8);
+      background: radial-gradient(circle at top, rgba(0,0,0,0.9), rgba(2,30,32,0.96));
+      color: var(--accent-aqua);
+      font-size: 0.64rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      text-decoration: none;
+      box-shadow: 0 0 14px rgba(51,233,255,0.9), 0 0 30px rgba(196,59,255,0.6);
+      transform: translateZ(45px);
+      backdrop-filter: blur(8px);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .nav-node a:hover {
+      transform: translateZ(65px) scale(1.03);
+      border-color: rgba(255,251,136,0.9);
+      color: var(--accent-yellow);
+      background: radial-gradient(circle at top, rgba(12,0,20,0.96), rgba(50,0,80,0.96));
+      box-shadow: 0 0 26px rgba(255,251,136,0.9);
+    }
+
+    .nav-wheel-core::before {
+      content: "HOLO-ROUTE / DOC911 GRID";
+      position: absolute;
+      bottom: 16%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      opacity: 0.85;
+    }
+
+    .nav-wheel-core::after {
+      content: "";
+      position: absolute;
+      inset: 28%;
+      border-radius: 50%;
+      border: 1px dashed rgba(196,59,255,0.65);
+      box-shadow: inset 0 0 26px rgba(196,59,255,0.85);
+      opacity: 0.9;
+    }
+
+    .nav-wheel-center-orb {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 88px; height: 88px;
+      margin: -44px 0 0 -44px;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, rgba(196,59,255,0.18), rgba(51,233,255,0.6), rgba(53,255,155,0.6), rgba(196,59,255,0.18));
+      box-shadow: 0 0 18px rgba(196,59,255,0.8), 0 0 42px rgba(51,233,255,0.6);
+      border: 1px solid rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-yellow);
+      font-size: 0.65rem;
+      text-align: center;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.7rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ----
+       MODAL: PROJECT R.A.T. RAPS DOSSIER
+       ---- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(10, 0, 30, 0.88), rgba(0, 0, 0, 0.96));
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-backdrop.active { display: flex; }
+
+    .modal-panel {
+      width: min(720px, 92vw);
+      max-height: 80vh;
+      background: radial-gradient(circle at top, rgba(8, 8, 24, 0.96), rgba(0, 0, 0, 0.98));
+      border-radius: 20px;
+      border: 1px solid rgba(115,255,224,0.5);
+      box-shadow: 0 0 26px rgba(196,59,255,0.7), 0 0 60px rgba(51,233,255,0.7);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1.1rem 1.4rem 0.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .modal-title {
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: var(--accent-yellow);
+    }
+
+    .modal-badge {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-aqua);
+      border-radius: 999px;
+      padding: 0.28rem 0.8rem;
+      border: 1px solid rgba(196,59,255,0.7);
+      background: radial-gradient(circle at top, rgba(0,0,0,0.96), rgba(20,0,36,0.96));
+    }
+
+    .modal-body {
+      padding: 0.6rem 1.4rem 1.2rem;
+      overflow-y: auto;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .modal-close {
+      border: 1px solid rgba(255,255,255,0.2);
+      background: transparent;
+      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 0.8rem;
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+      border-color: rgba(255,79,106,0.9);
+      box-shadow: 0 0 18px rgba(255,79,106,0.9);
+      transform: translateY(-1px);
+      background: rgba(0,0,0,0.9);
+    }
+
+    .modal-footer-note { margin-top: 0.8rem; font-size: 0.7rem; color: var(--accent-violet); }
+
+    /* ----
+       AMBIENT AUDIO ELEMENT (HIDDEN)
+       ---- */
+    #ambient-audio { display: none; }
+
+    /* ----
+       LANDING / TITLE CARD
+       ---- */
+    .title-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr);
+      gap: 2.4rem;
+      align-items: center;
+    }
+
+    .title-main-block h1 {
+      font-size: clamp(2.2rem, 4.3vw, 3rem);
+      letter-spacing: 0.22em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      margin-bottom: 1.3rem;
+      text-shadow: 0 0 20px rgba(196,59,255,0.9), 0 0 60px rgba(51,233,255,0.7);
+    }
+
+    .title-main-block h1 span.highlight { color: var(--accent-aqua); }
+
+    .title-tagline {
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.86rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 34rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .title-meta {
+      font-size: 0.75rem;
+      color: var(--accent-green);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1.4rem;
+    }
+
+    .title-cta-row { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 0.6rem; }
+
+    .title-aside {
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(115,255,224,0.5);
+      padding: 1.3rem 1.2rem;
+      background: radial-gradient(circle at top, rgba(0,0,0,0.9), rgba(12, 0, 30, 0.96));
+      box-shadow: 0 0 34px rgba(196,59,255,0.7);
+    }
+
+    .title-aside-label {
+      position: absolute;
+      top: 0.65rem;
+      right: 1.1rem;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent-aqua);
+    }
+
+    .title-aside-main {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.19em;
+      color: var(--accent-yellow);
+      margin-bottom: 0.8rem;
+    }
+
+    .title-aside-body {
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.77rem;
+      color: var(--text-muted);
+      margin-bottom: 0.9rem;
+    }
+
+    .title-aside-footer { font-size: 0.7rem; color: var(--accent-violet); }
+
+    /* ----
+       FOOTER
+       ---- */
+    footer.site-footer {
+      padding: 1.3rem 1.5rem 1.6rem;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.6rem;
+      border-top: 1px solid rgba(115,255,224,0.18);
+      background: linear-gradient(to top, rgba(1,1,12,0.96), rgba(1,1,16,0.8), transparent);
+      margin-top: 1rem;
+    }
+
+    .footer-right { text-align: right; }
+    .footer-right span { color: var(--accent-violet); }
+
+    /* ----
+       RESPONSIVE TWEAKS
+       ---- */
+    @media (max-width: 900px) {
+      .title-layout { grid-template-columns: minmax(0, 1fr); }
+      .content-frame { padding: 1.8rem 1.4rem; }
+      .scene-nav-row { flex-direction: column; align-items: stretch; }
+      .scene-nav-left, .scene-nav-right { justify-content: space-between; }
+    }
+
+    @media (max-width: 640px) {
+      header.site-header { padding: 0 1rem; }
+      .logo-text-main { font-size: 0.78rem; }
+      .logo-text-sub { display: none; }
+      .title-main-block h1 { letter-spacing: 0.16em; }
+      .content-frame { border-radius: 18px; }
+      .nav-wheel { width: 88vw; height: 88vw; }
+      .nav-node a { font-size: 0.6rem; }
+      .panel-art img, figure.scene-figure img { max-height: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Ambient Audio (subtle, user-toggle) -->
+  <audio id="ambient-audio" loop>
+    <!-- Placeholder SRC: Replace with ambient sci-fi loop as needed -->
+  </audio>
+
+  <!-- LOADING OVERLAY WITH GLITCH -->
+  <div id="loading-overlay" aria-hidden="true">
+    <div class="loading-logo">
+      <span class="glitch-text" data-text="SQUEAKY G / BOOTING">SQUEAKY G / BOOTING</span>
+    </div>
+    <div class="loading-sub">ALIGNING CRUMBS IN THE WIRES // GLITCH-VECTOR CALIBRATION</div>
+    <div class="loading-bar"><div class="loading-bar-inner"></div></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <a href="#title-card" class="site-logo" aria-label="Return to title card">
+      <div class="logo-orb" aria-hidden="true"></div>
+      <div>
+        <div class="logo-text-main">SQUEAKY G: ORIGIN OF THE GLITCH</div>
+        <div class="logo-text-sub">CRUMBS IN THE WIRES / DOC911 APPROVED</div>
+      </div>
+    </a>
+    <div class="header-controls">
+      <button class="ambient-toggle muted" type="button" id="ambient-toggle" aria-pressed="false">
+        <span class="icon" aria-hidden="true"></span>
+        <span>Ambient</span>
+      </button>
+      <a href="#nav" class="nav-link-minimal">Holo Nav</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ====
+         ROUTE: TITLE CARD
+         ==== -->
+    <section id="title-card" class="route-section active" aria-labelledby="title-title">
+      <div class="content-frame">
+        <div class="content-inner title-layout">
+          <div class="title-main-block">
+            <div class="tagline-chip">"I'm Squeaky G evolve now call me DOC911 approved."</div>
+            <h1 id="title-title">
+              SQUEAKY G:<br />
+              <span class="highlight">Origin of the Glitch</span><br />
+              – Crumbs in the Wires –
+            </h1>
+            <p class="title-tagline">
+              Somewhere between a back-alley boombox cipher and a quantum-malware experiment gone wrong,
+              a rat-sized gangster named <strong>Squeaky G</strong> gets abducted by cyberpunk aliens,
+              rewritten as a living emergency protocol, and booted back into the city as the glitch-messenger
+              known only as <strong>DOC911</strong>.
+            </p>
+            <div class="title-meta">A darkly funny sci‑fi gangster tale told as a neon comic & animated micro‑short.</div>
+            <div class="title-cta-row">
+              <button class="holo-btn" type="button" data-nav="#scene-1"><span class="chevron">▶</span> Begin Origin</button>
+              <button class="holo-btn secondary" type="button" data-nav="#nav">Open Holo NAV</button>
+            </div>
+          </div>
+
+          <aside class="title-aside">
+            <div class="title-aside-label">DOC911 ARCHIVE // CASE PRIMER</div>
+            <div class="title-aside-main">Crumbs in the Wires / Incident Log 0xG</div>
+            <div class="title-aside-body">
+              The first 20-page run of <strong>"The Squeaky G Story – Abduction Transformation Introduction"</strong>
+              is encoded in this site. Every scene below maps to a slice of the case file: from alleyway flexing
+              to orbital abduction, cosmic onboarding, and the moment Squeaky G signs off as:<br />
+              <strong>"I'm Squeaky G. Evolve now. Call me DOC911. Approved."</strong>
+            </div>
+            <div class="title-aside-footer">
+              <strong>NOTE:</strong> A full 20-page printable PDF comic and animated short storyboard are to be exported
+              from this script. See clearly marked PDF/STORYBOARD INSERT ZONES in each scene.
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: SCENE 1 – THE GANGSTER SQUEAKY G
+         ==== -->
+    <section id="scene-1" class="route-section" aria-labelledby="scene1-title">
+      <div class="content-frame">
+        <div class="content-inner">
+          <h1 class="page-title" id="scene1-title">Scene 1: The Gangster Squeaky G</h1>
+          <h2 class="section-subtitle">Alleyway signal // crumbs, codes & low-level legends</h2>
+
+          <div class="ascii-glitch">▓▓▒▒░ INITIALIZING STREET-LEVEL SCENE / SQUEAKY.G_0x01 ░▒▒▓▓</div>
+
+          <div class="script-section">
+            <div class="script-label">Comic Script – "The Squeaky G Story – Abduction Transformation Introduction"</div>
+
+            <h3>SCENE 1 – PANEL SCRIPT</h3>
+            <ul class="panel-list">
+              <li class="panel-item">
+                <div class="panel-heading">Panel 1</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 1.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 1 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 1: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 1 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Wide establishing shot. Night. Cyberpunk city alley, rain caught in neon, trash holograms flickering.
+                  Tiny rat-sized stage built from crates and busted speakers. Squeaky G stands center, mic cable dragging like a snake.
+                  <br /><strong>Emotion:</strong> Cocky, electric.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION (DOC911 NARRATION):</span> Before the sirens screamed my name, they just called me crumbs in the concrete.</p>
+                  <p><span class="character">SQUEAKY G (RAPPING):</span> "Chrome-chewin', code-spewin', alleyway lord / every crumb that I drop is a circuit I stored!"</p>
+                  <p><span class="character">CAPTION:</span> Back then, I was strictly street-level firmware.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 2</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 2.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 2 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 2: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 2 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Closer on Squeaky G. He's a slick anthropomorphic rat: micro-joggers, oversized hoodie, chain with a glowing "G".
+                  One ear clipped, one eye cyber-enhanced with a faint HUD reflection.
+                  <br /><strong>Emotion:</strong> Full swagger.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Rats in the gutter but my code run prime / squeak once, streets echo in encrypted time!"</p>
+                  <p><span class="character">BACKGROUND CHORUS (OTHER RATS, OFF):</span> "G! G! G!"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 3</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 3.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 3 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 3: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 3 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Cut to his paws sprinkling crumbs in deliberate patterns on the wet pavement—like circuit traces forming a sigil no human would notice.
+                  <br /><strong>Emotion:</strong> Focused, ritualistic.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> Every bar, I dropped crumbs as coordinates. Little data points the city never swept.</p>
+                  <p><span class="character">SQUEAKY G (MUTTER):</span> "North line, sewer spine, backdoor to the skyline…"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 4</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 4.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 4 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 4: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 4 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Top-down shot. The crumbs glimmer faintly, forming a circuit-like glyph. Overlaid ghost image of a star map, hinting the pattern is bigger than just one alley.
+                  <br /><strong>Emotion:</strong> Foreshadowing.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> I thought I was just mapping my empire.</p>
+                  <p><span class="character">CAPTION (SMALL):</span> The universe thought different.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 5</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 5.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 5 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 5: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 5 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Mid shot, Squeaky G poses with one foot on a broken drone, chain glinting. In the far background, a barely visible triangular light pattern in the smoggy sky.
+                  <br /><strong>Emotion:</strong> Oblivious pride.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "From gutter rail to data trail, I run the glitchy choir / city breathe my verses through the static in the wire!"</p>
+                  <p><span class="character">CAPTION:</span> Nobody told me somebody… <em>something</em>… was listening.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 6</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 1 panel 6.png"
+                    data-lightbox
+                    data-caption="Scene 1 / Panel 6 (click to zoom full-res)."
+                    alt="Scene 1 / Panel 6: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 1 / Panel 6 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Tight on Squeaky G's cyber-eye. A weird glyph reflects in his iris: alien UI overlaying the alley.
+                  <br /><strong>Emotion:</strong> Micro-second confusion.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G (SMALL):</span> "…huh?"</p>
+                  <p><span class="character">CAPTION:</span> First glitch in the beat. First crack in the wire.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="ascii-glitch">░░░ SYSLOG: STREET-LEVEL AUDIO STREAM FLAGGED BY UNKNOWN LISTENER ░░░</div>
+
+            <h3>Animated Short Version – Scene 1 Beats</h3>
+            <ul class="beats-list">
+              <li>Neon alley establishes the world: dripping pipes, hologram ads, rats in shadows.</li>
+              <li>Squeaky G performs on a makeshift stage, tiny but larger-than-life in attitude.</li>
+              <li>Quick cuts between his bars and crumb patterns forming glowing micro-circuits.</li>
+              <li>Overhead shot: crumb-circuits morph into a massive star map overlaying the city grid.</li>
+              <li>Sound design: boombox bass blends into a low alien hum as his last bar hits.</li>
+              <li>Final beat: close-up on his cyborg eye catching an impossible glyph, the music stutters.</li>
+            </ul>
+          </div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small secondary" type="button" data-nav="#title-card"><span class="chevron">◀</span> Back to Title</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small" type="button" data-nav="#nav">Holo NAV</button>
+              <button class="holo-btn small" type="button" data-nav="#scene-2">Next Scene <span class="chevron">▶</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: SCENE 2 – THE ABDUCTION OF SQUEAKY G
+         ==== -->
+    <section id="scene-2" class="route-section" aria-labelledby="scene2-title">
+      <div class="content-frame">
+        <div class="content-inner">
+          <h1 class="page-title" id="scene2-title">Scene 2: The Abduction of Squeaky G</h1>
+          <h2 class="section-subtitle">When the sky samples your signal and drags you off‑grid</h2>
+
+          <!-- SCENE 2 MAIN IMAGE (CLICK TO ZOOM) -->
+          <figure class="scene-figure">
+            <img
+              src="SCENE 2.png"
+              data-lightbox
+              data-caption="Scene 2 composite (full-res): triangular rift samples the verse and corrupts the alley into a loading bar."
+              alt="Scene 2 composite: abduction sequence in a neon alley with a triangular rift sampling Squeaky G's signal."
+            />
+            <figcaption>
+              Scene 2 composite art: the triangular rift samples the verse and turns the alley into a corrupted loading bar. <em>(Click to zoom)</em>
+            </figcaption>
+          </figure>
+
+          <div class="ascii-glitch">███ SIGNAL LEAK DETECTED // UPLINK ENFORCERS DEPLOYED ███</div>
+
+          <div class="script-section">
+            <div class="script-label">Comic Script – Scene 2</div>
+
+            <h3>SCENE 2 – PANEL SCRIPT</h3>
+            <ul class="panel-list">
+              <li class="panel-item">
+                <div class="panel-heading">Panel 1</div>
+                <div class="panel-meta">
+                  Low-angle shot from alley floor. Rain splashes, a bottle rolls. The sky above fractures into a glowing triangular rift,
+                  lines of alien code dripping downward like neon rain.
+                  <br /><strong>Emotion:</strong> Surreal intrusion.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="SCENE 2 panel 1.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 1 — 'That night, the sky rhymed back.'"
+                    alt="Scene 2 Panel 1: alley floor in rain, triangular rift opens with alien glyphs."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 1 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION (DOC911):</span> That night, the sky rhymed back.</p>
+                  <p><span class="character">ALIEN VOICE (ECHO, UNTRANSLATED):</span> <clicking glyphs / harmonic chirps></p>
+                </div>
+              </li>
+
+              <li class="panel-item">
+                <div class="panel-heading">Panel 2</div>
+                <div class="panel-meta">
+                  Squeaky G stares up, mic half-raised. The alien rift projects a waveform of his last verse, rotating like a holographic vinyl.
+                  <br /><strong>Emotion:</strong> Startled ego.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="SCENE 2 panel 2.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 2 — 'Yo… the clouds just replayed my hook?'"
+                    alt="Scene 2 Panel 2: Squeaky G looks up as clouds replay his hook as a holographic vinyl waveform."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 2 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Yo… the clouds just replayed my hook?"</p>
+                  <p><span class="character">CAPTION:</span> Nothing boosts your ego like the cosmos running your track.</p>
+                </div>
+              </li>
+
+              <li class="panel-item">
+                <div class="panel-heading">Panel 3</div>
+                <div class="panel-meta">
+                  Beams of geometric light spear down, but instead of clean tractor beams, they're jagged, glitchy polygons.
+                  Trash, drones, and loose wires float upwards in stuttering frames.
+                  <br /><strong>Emotion:</strong> Chaotic lift-off.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 2 panel 3.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 3 — debris + drones + glitch beams."
+                    alt="Scene 2 Panel 3: glitch beams lift debris and drones; backup singer shouts about budget."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 3 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">RAT BACKUP SINGER:</span> "G, your fanbase got <em>budget</em>!"</p>
+                  <p><span class="character">SQUEAKY G:</span> "Ain't fans if they ain't payin' crumbs—WHOA!"</p>
+                </div>
+              </li>
+
+              <li class="panel-item">
+                <div class="panel-heading">Panel 4</div>
+                <div class="panel-meta">
+                  Squeaky G is lifted from the ground, paws scrambling mid-air. The mic cable whips around him like a tail made of static.
+                  A HUD overlay locks onto him: <TARGET: SQUEAKY.G / STREET-SIGNAL ANOMALY>.
+                  <br /><strong>Emotion:</strong> Panic under bravado.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 2 panel 4.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 4 — TARGET: SQUEAKY.G / STREET-SIGNAL ANOMALY."
+                    alt="Scene 2 Panel 4: HUD lock on Squeaky G labeled street-signal anomaly as he is lifted."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 4 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Aight, aight, I get it! VIP treatment! Put me down—"</p>
+                  <p><span class="character">ALIEN VOICE (TRANSLATED CAPTION):</span> "Subject identified. Crumb-mapping algorithm: <em>original</em>."</p>
+                </div>
+              </li>
+
+              <li class="panel-item">
+                <div class="panel-heading">Panel 5</div>
+                <div class="panel-meta">
+                  Interior shot of alien ship corridor bleeding through the alley: we see overlapping images—one half alley, one half slick chrome tube.
+                  Alien silhouettes peek through: lanky, bio-mech beings with shifting masks.
+                  <br /><strong>Emotion:</strong> Reality overlap.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 2 panel 5.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 5 — alley desyncs: one frame city, next frame spaceship."
+                    alt="Scene 2 Panel 5: alley desyncs into spaceship corridor split; alien silhouettes and interference."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 5 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> The alley desynced. One frame city, next frame spaceship.</p>
+                  <p><span class="character">ALIEN #1 (CLICK-GLYPH):</span> "<Local entity has self-organized routing logic.>"</p>
+                  <p><span class="character">ALIEN #2:</span> "<Street gangster… or low-level navigation AI?>"</p>
+                </div>
+              </li>
+
+              <li class="panel-item">
+                <div class="panel-heading">Panel 6</div>
+                <div class="panel-meta">
+                  Tight on Squeaky G's face as he breaks the fourth wall, still mid-abduction.
+                  His chain dangles upside-down, crumbs floating around like stars.
+                  <br /><strong>Emotion:</strong> Sarcastic fear.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 2 panel 6.png"
+                    data-lightbox
+                    data-caption="Scene 2 / Panel 6 — 'Y'all coulda asked for a feature.'"
+                    alt="Scene 2 Panel 6: upside-down Squeaky G cracks a fourth-wall joke during abduction."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 2 / Panel 6 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Just so we clear—y'all coulda <em>asked</em> for a feature."</p>
+                  <p><span class="character">CAPTION:</span> Abduction rule one: the universe don't do consent forms.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="ascii-glitch">▒▒▒ ORBITAL HANDSHAKE INITIATED // SQUEAKY.G LIFTED FROM LOCAL CONTEXT ▒▒▒</div>
+
+            <h3>Animated Short Version – Scene 2 Beats</h3>
+            <ul class="beats-list">
+              <li>Music track glitches as the sky fractures into a triangular rift above the alley.</li>
+              <li>Rift samples Squeaky G's vocals, spinning them as a holographic waveform record.</li>
+              <li>Jagged, flickering beams yank everything, including Squeaky G, upward in jumpy frames.</li>
+              <li>Visual crossfade between alley textures and slick alien metal corridors.</li>
+              <li>We glimpse strange alien silhouettes watching data on him as "SIGNAL ANOMALY."</li>
+              <li>End beat: upside-down Squeaky G cracks a joke at the camera as the alley vanishes.</li>
+            </ul>
+          </div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small" type="button" data-nav="#scene-1"><span class="chevron">◀</span> Previous Scene</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small" type="button" data-nav="#nav">Holo NAV</button>
+              <button class="holo-btn small" type="button" data-nav="#scene-3">Next Scene <span class="chevron">▶</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: SCENE 3 – THE UNIVERSAL TRIP
+         ==== -->
+    <section id="scene-3" class="route-section" aria-labelledby="scene3-title">
+      <div class="content-frame">
+        <div class="content-inner">
+          <h1 class="page-title" id="scene3-title">Scene 3: The Universal Trip</h1>
+          <h2 class="section-subtitle">Out of the alley, into the everywhere</h2>
+
+          <div class="ascii-glitch">█░ UNIVERSAL BUS PASS GRANTED // SUBJECT: SQUEAKY.G_0x03 ░█</div>
+
+          <div class="script-section">
+            <div class="script-label">Comic Script – Scene 3</div>
+            <h3>SCENE 3 – PANEL SCRIPT</h3>
+            <ul class="panel-list">
+              <li class="panel-item">
+                <div class="panel-heading">Panel 1</div>
+                <div class="panel-meta">
+                  Interior shot. Squeaky G floats in a translucent restraint bubble, suspended above an alien deck.
+                  Outside the viewport, streaks of multi-colored starlight bend at impossible angles.
+                  <br /><strong>Emotion:</strong> Overwhelmed awe.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 1.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 1 — 'City ain't even on the minimap no more…'"
+                    alt="Scene 3 Panel 1: Squeaky G floats in restraint bubble above alien deck with starlight outside."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 1 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G (QUIET):</span> "City ain't even on the minimap no more…"</p>
+                  <p><span class="character">CAPTION (DOC911):</span> Hard to rep your block when your block is a pixel in somebody else's UI.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 2</div>
+                <div class="panel-meta">
+                  Holographic HUD forms around him, projecting schematics of his body: bones, street implants, breadcrumb patterns,
+                  each tagged with alien text and color.
+                  <br /><strong>Emotion:</strong> Deconstructed, objectified.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 2.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 2 — 'Look, if y'all gonna roast my diet, at least pass the cheese.'"
+                    alt="Scene 3 Panel 2: Holographic HUD projects schematics of Squeaky G's body with alien tags."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 2 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">ALIEN #1 (OFF):</span> "<Observe: Subject routes resources using edible markers.>"</p>
+                  <p><span class="character">ALIEN #2:</span> "<Inefficient. Brilliant. Dangerous.>"</p>
+                  <p><span class="character">SQUEAKY G:</span> "Look, if y'all gonna roast my diet, at least pass the cheese."</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 3</div>
+                <div class="panel-meta">
+                  Outside the glass, we see branching trails of light connecting planets, cities, and unlabeled voids.
+                  Some paths resemble Squeaky G's crumb patterns almost one-to-one.
+                  <br /><strong>Emotion:</strong> Epiphany loading.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 3.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 3 — 'I was plagiarizing the cosmos and didn't even know it.'"
+                    alt="Scene 3 Panel 3: Cosmic trails connecting planets and cities resembling crumb patterns."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 3 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> Turns out I'd been tracing something older than my block.</p>
+                  <p><span class="character">CAPTION (SMALL):</span> I was plagiarizing the cosmos and didn't even know it.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 4</div>
+                <div class="panel-meta">
+                  Squeaky taps the inside of the restraint bubble. It ripples, showing flashes of other lives:
+                  human dispatchers, traffic AIs, emergency drones, all moving along invisible routes.
+                  <br /><strong>Emotion:</strong> Curiosity overriding fear.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 4.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 4 — 'Yo… those paths… they like my crumbs, just… bigger.'"
+                    alt="Scene 3 Panel 4: Squeaky taps bubble showing flashes of dispatchers, traffic AIs, and drones."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 4 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Yo… those paths… they like my crumbs, just… bigger."</p>
+                  <p><span class="character">ALIEN #1:</span> "<He intuits routing. Calibration potential: high.>"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 5</div>
+                <div class="panel-meta">
+                  Close on an alien console labeled in strange glyphs. One translation box at the bottom reads:
+                  PROJECT: R.A.T. RAPS – ROUTING ADAPTIVE TRANSMITTER, RAP-BASED.
+                  <br /><strong>Emotion:</strong> Darkly comic inevitability.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 5.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 5 — 'Y'all named a science project after me and didn't send royalties?'"
+                    alt="Scene 3 Panel 5: Alien console showing PROJECT: R.A.T. RAPS with translation."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 5 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> Turns out I was auditioning for something called <strong>Project R.A.T. Raps</strong>.</p>
+                  <p><span class="character">SQUEAKY G (OFF):</span> "Y'all named a science project after me and didn't send royalties?"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 6</div>
+                <div class="panel-meta">
+                  Squeaky's face reflected in the console glass, half rat, half glitching schematic. Tiny pixel-fragments drift off his whiskers.
+                  <br /><strong>Emotion:</strong> Identity starting to blur.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 3 panel 6.png"
+                    data-lightbox
+                    data-caption="Scene 3 / Panel 6 — 'I became a route looking for something to save.'"
+                    alt="Scene 3 Panel 6: Squeaky's face half rat, half glitching schematic with pixel fragments."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 3 / Panel 6 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION (DOC911):</span> On that ride, I stopped being just a body.</p>
+                  <p><span class="character">CAPTION:</span> I became a <em>route</em> looking for something to save.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="ascii-glitch">░░ PROJECT R.A.T. RAPS FLAG: OPEN DOSSIER? [Y/N] ░░</div>
+
+            <button class="holo-btn small secondary" type="button" id="open-rat-modal">Open Project R.A.T. Raps Dossier</button>
+
+            <h3>Animated Short Version – Scene 3 Beats</h3>
+            <ul class="beats-list">
+              <li>We see Squeaky floating in a restraint bubble as the ship warps through kaleidoscopic space.</li>
+              <li>Alien HUD peels his body apart into data, highlighting crumb-maps and instinctive routing.</li>
+              <li>Montage: universal traffic flows, emergency routes, and wormholes mirror his street patterns.</li>
+              <li>Term "PROJECT R.A.T. RAPS" appears on a console in stylized alien type with translation overlay.</li>
+              <li>Trip culminates with his reflection glitching into wireframes and neon vectors.</li>
+              <li>Beat ends on Squeaky's growing suspicion that he's being rewritten into something bigger.</li>
+            </ul>
+          </div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small" type="button" data-nav="#scene-2"><span class="chevron">◀</span> Previous Scene</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small" type="button" data-nav="#nav">Holo NAV</button>
+              <button class="holo-btn small" type="button" data-nav="#scene-4">Next Scene <span class="chevron">▶</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: SCENE 4 – THE LEARNING
+         ==== -->
+    <section id="scene-4" class="route-section" aria-labelledby="scene4-title">
+      <div class="content-frame">
+        <div class="content-inner">
+          <h1 class="page-title" id="scene4-title">Scene 4: The Learning</h1>
+          <h2 class="section-subtitle">From alley gangster to cosmic emergency protocol</h2>
+
+          <div class="ascii-glitch">██ TRAINING SUITE ONLINE // SUBJECT: SQUEAKY.G LEARNING PATCH APPLIED ██</div>
+
+          <!-- SCENE 4 MAIN IMAGE (CLICK TO ZOOM) -->
+          <figure class="scene-figure">
+            <img
+              src="SCENE 4.png"
+              data-lightbox
+              data-caption="Scene 4 composite (full-res): training suite holograms, crisis routing overlays, and the DOC911 crown patch sequence."
+              alt="Scene 4 composite: Squeaky G in an alien training chamber learning emergency routing and receiving a crown of symbols."
+            />
+            <figcaption>
+              Scene 4 composite art: the training suite sequence—crisis holograms, re-routing flows, and the DOC911 crown patch. <em>(Click to zoom)</em>
+            </figcaption>
+          </figure>
+
+          <div class="script-section">
+            <div class="script-label">Comic Script – Scene 4</div>
+
+            <h3>SCENE 4 – PANEL SCRIPT</h3>
+            <ul class="panel-list">
+              <li class="panel-item">
+                <div class="panel-heading">Panel 1</div>
+                <div class="panel-meta">
+                  Alien training chamber. Squeaky stands on a small platform, rings of holographic scenes orbiting him:
+                  disasters, blocked roads, failed call centers, flickering distress signals.
+                  <br /><strong>Emotion:</strong> Overloaded but locked in.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 1.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 1 — Training chamber online: 'These are your new alleys.'"
+                    alt="Scene 4 Panel 1: alien training chamber with holographic crisis rings orbiting Squeaky G."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 1 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">ALIEN INSTRUCTOR:</span> "<These are your new alleys.>"</p>
+                  <p><span class="character">SQUEAKY G:</span> "You tryna tell me every panic button is just another block party to host?"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 2</div>
+                <div class="panel-meta">
+                  Close on one hologram: a human ambulance stuck in gridlocked traffic, citizens yelling into dead phones.
+                  <br /><strong>Emotion:</strong> Rising empathy under sarcasm.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 2.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 2 — Ambulance gridlock hologram: 'We route lives.'"
+                    alt="Scene 4 Panel 2: hologram of ambulance stuck in traffic with citizens and dead phones."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 2 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">ALIEN INSTRUCTOR (CAPTION):</span> "<Your kind routes crumbs through chaos. We route lives.>"</p>
+                  <p><span class="character">SQUEAKY G:</span> "…Y'all network broken, then."</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 3</div>
+                <div class="panel-meta">
+                  Squeaky waves a paw and the holograms rearrange into lines and nodes like his crumb maps, forming clean paths for ambulances, drones, and data calls.
+                  <br /><strong>Emotion:</strong> Instinctive genius.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 3.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 3 — Squeaky re-routes the whole panic: branch, pivot, hustle."
+                    alt="Scene 4 Panel 3: Squeaky rearranges holograms into node-and-line routes for ambulances, drones, and data calls."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 3 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Yo, you don't send every call through the same choke. You branch, you pivot, you hustle."</p>
+                  <p><span class="character">ALIEN OBSERVER (OFF):</span> "<He re-routes in three dimensions without computation.>"</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 4</div>
+                <div class="panel-meta">
+                  Zoom on Squeaky's head as a lightweight crown of light forms — not painful, more like a halo of UI elements:
+                  siren icons, heartbeat lines, emergency numbers, alien glyphs.
+                  <br /><strong>Emotion:</strong> Reluctant acceptance.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 4.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 4 — Crown of emergency symbols forms: reluctant acceptance."
+                    alt="Scene 4 Panel 4: Close-up as a crown of light UI elements forms above Squeaky's head."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 4 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">ALIEN INSTRUCTOR:</span> "<We propose integration.>"</p>
+                  <p><span class="character">SQUEAKY G:</span> "Integration sound like 'ownership' with extra syllables."</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 5</div>
+                <div class="panel-meta">
+                  Montage split panel: left side shows young Squeaky scavenging crumbs while dodging boots; right side shows emergency operators drowning in blinking lights, calls unanswered.
+                  <br /><strong>Emotion:</strong> Mirror empathy.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 5.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 5 — 'I knew hunger. They knew helpless. Different flavor of the same void.'"
+                    alt="Scene 4 Panel 5: Split montage of young Squeaky scavenging crumbs and overwhelmed emergency operators with missed calls."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 5 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> I knew hunger. They knew helpless.</p>
+                  <p><span class="character">CAPTION:</span> Different flavor of the same void.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 6</div>
+                <div class="panel-meta">
+                  Final panel of scene: Squeaky grips the holographic mic now shaped like a stylized emergency phone handset merged with a graffiti tag.
+                  His eyes glow twin colors: alley neon and sterile emergency light.
+                  <br /><strong>Emotion:</strong> Decision made.
+                </div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 4 panel 6.png"
+                    data-lightbox
+                    data-caption="Scene 4 / Panel 6 — 'Aight. Teach me how to route the whole panic.' Decision made."
+                    alt="Scene 4 Panel 6: Squeaky grips a glowing mic-handset graffiti hybrid; eyes glow as he commits to routing the panic."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 4 / Panel 6 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Aight. Teach me how to route the whole panic."</p>
+                  <p><span class="character">ALIEN INSTRUCTOR (SMALL):</span> "<Subject accepting patch.>"</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="ascii-glitch">▓▓▓ TRAINING COMPLETE / SQUEAKY.G PATCHED WITH EMERGENCY ROUTING PROTOCOLS ▓▓▓</div>
+
+            <h3>Animated Short Version – Scene 4 Beats</h3>
+            <ul class="beats-list">
+              <li>Cut to a training chamber where crises from across the universe swirl around Squeaky.</li>
+              <li>Aliens explain in voiceover that they route emergencies; Squeaky critiques their clogged systems.</li>
+              <li>In stylized montage, he rearranges nodes and lines, turning chaotic holograms into clean flows.</li>
+              <li>A crown of emergency symbols and alien glyphs gently snaps onto him like an OS upgrade.</li>
+              <li>Cross-fades between his street-hungry past and people desperate for help across galaxies.</li>
+              <li>End beat: determined close-up as he agrees to learn, mic transforming into a DOC-style hotline icon.</li>
+            </ul>
+          </div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small" type="button" data-nav="#scene-3"><span class="chevron">◀</span> Previous Scene</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small" type="button" data-nav="#nav">Holo NAV</button>
+              <button class="holo-btn small" type="button" data-nav="#scene-5">Next Scene <span class="chevron">▶</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: SCENE 5 – THE INTRODUCTION OF DOC911
+         ==== -->
+    <section id="scene-5" class="route-section" aria-labelledby="scene5-title">
+      <div class="content-frame">
+        <div class="content-inner">
+          <h1 class="page-title" id="scene5-title">Scene 5: The Introduction of DOC911</h1>
+          <h2 class="section-subtitle">"I'm Squeaky G. Evolve now. Call me DOC911. Approved."</h2>
+
+          <div class="ascii-glitch">█▄ FINAL PATCH DEPLOYMENT / IDENTITY: DOC911 ONLINE █▄</div>
+
+          <div class="script-section">
+            <div class="script-label">Comic Script – Scene 5</div>
+
+            <h3>SCENE 5 – PANEL SCRIPT</h3>
+            <ul class="panel-list">
+              <li class="panel-item">
+                <div class="panel-heading">Panel 1</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 1.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 1 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 1: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 1 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Exterior. City skyline at dawn. The alien ship is a ghost-pattern in the clouds, barely visible.
+                  A thin beam drops Squeaky back onto a high rooftop antenna.
+                  <br /><strong>Emotion:</strong> Quiet, heavy return.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION (DOC911):</span> Home again. Same city. Different firmware.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 2</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 2.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 2 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 2: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 2 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Close on Squeaky's new look: still hoodie, still chain, but the "G" charm now rotates between G and a stylized "911" made of glitch-lines.
+                  Eyes glow softly, not menacing, more alert.
+                  <br /><strong>Emotion:</strong> Re-centered identity.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "They really did it. Turned a crumb hustler into a hotline."</p>
+                  <p><span class="character">CAPTION:</span> Funny thing is, I ain't mad about it.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 3</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 3.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 3 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 3: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 3 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  The air around him fills with translucent threads of light running across the city—emergency calls, lost kids, bad crashes, silent panic.
+                  Each thread has tiny icons: phones, sirens, alien glyphs.
+                  <br /><strong>Emotion:</strong> Responsibility landing.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> Before, I only followed trails that led to me.</p>
+                  <p><span class="character">CAPTION:</span> Now every trail is someone else screaming in the static.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 4</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 4.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 4 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 4: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 4 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Squeaky raises his mic-hand. The mic now looks like a handheld radio crossed with a street tag, glowing with DOC911 colors.
+                  A small, half-joking smirk.
+                  <br /><strong>Emotion:</strong> Playful, resolved.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">SQUEAKY G:</span> "Aight. Contract time."</p>
+                  <p><span class="character">SQUEAKY G (LOUD):</span> "I'm Squeaky G. Evolve now. Call me <strong>DOC911</strong>. Approved."</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 5</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 5.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 5 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 5: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 5 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  The word DOC911 appears as a huge, holographic graffiti tag above the skyline, letters built from glitch-lines, siren shapes, and tiny alien characters.
+                  A subtle halo encircles the city.
+                  <br /><strong>Emotion:</strong> Myth being born.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION:</span> The aliens logged a successful deployment.</p>
+                  <p><span class="character">CAPTION:</span> The streets just heard a new name in the echo.</p>
+                </div>
+              </li>
+              <li class="panel-item">
+                <div class="panel-heading">Panel 6</div>
+
+                <div class="panel-art">
+                  <img
+                    src="scene 5 panel 6.png"
+                    data-lightbox
+                    data-caption="Scene 5 / Panel 6 (click to zoom full-res)."
+                    alt="Scene 5 / Panel 6: comic art panel image."
+                  />
+                  <div class="panel-art-note">Art insert: Scene 5 / Panel 6 (click to zoom full-res).</div>
+                </div>
+
+                <div class="panel-meta">
+                  Epilogue-style panel. Back in the alley from Scene 1, but now faint holographic markers blink where his crumb-maps used to be.
+                  A small kid talks on a broken phone; a faint DOC911 sigil glows near them.
+                  <br /><strong>Emotion:</strong> Full-circle, hopeful-dark.
+                </div>
+                <div class="panel-dialog">
+                  <p><span class="character">CAPTION (DOC911):</span> I still move crumbs. Just different kind.</p>
+                  <p><span class="character">CAPTION:</span> Crumbs in the wires. Trails out of the dark.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="ascii-glitch">▒ EPILOGUE: DOC911 ROUTING DAEMON RESIDENT // LISTENING FOR STATIC PRAYERS ▒</div>
+
+            <h3>Animated Short Version – Scene 5 Beats</h3>
+            <ul class="beats-list">
+              <li>Soft dawn light as Squeaky returns, perched high above the same city that birthed him.</li>
+              <li>Visual reveal of his new DOC911-styled gear and the shifting "G/911" pendant.</li>
+              <li>Threads of emergency data and distress lines weave through the metropolis beneath him.</li>
+              <li>He claims his new name aloud, voice echoing with a subtle alien chorus behind it.</li>
+              <li>Giant holographic DOC911 tag burns over the skyline like a hip-hop deity of dispatch.</li>
+              <li>End on a grounded alley moment: a tiny glow answering a kid's broken call, hinting DOC911 is listening.</li>
+            </ul>
+
+            <h3>PDF & Storyboard Export Notes</h3>
+            <p>
+              This scene completes the core arc of the 20-page comic. Additional micro-panels and close-ups (faces, UI details,
+              street-level vignettes) should be added between these scripted beats to reach full 20-page density while preserving pacing.
+            </p>
+          </div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small" type="button" data-nav="#scene-4"><span class="chevron">◀</span> Previous Scene</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small secondary" type="button" data-nav="#nav">Holo NAV</button>
+              <button class="holo-btn small" type="button" data-nav="#title-card">Back to Title <span class="chevron">▲</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         ROUTE: NAV – 3D HOLOGRAPHIC CIRCULAR NAVIGATION
+         ==== -->
+    <section id="nav" class="route-section" aria-labelledby="nav-title">
+      <div class="content-frame">
+        <div class="content-inner nav-wheel-wrapper">
+          <h1 class="page-title" id="nav-title">Holo NAV: Crumbs in the Wires</h1>
+          <h2 class="section-subtitle">Spin the wheel. Pick your glitch.</h2>
+
+          <div class="nav-wheel">
+            <div class="nav-wheel-core">
+              <div class="nav-wheel-center-orb">ROUTE<br />DOC911</div>
+
+              <div class="nav-node" style="transform: rotateZ(0deg) translateY(-140px);"><a href="#title-card">Title Card</a></div>
+              <div class="nav-node" style="transform: rotateZ(60deg) translateY(-140px);"><a href="#scene-1">Scene 1</a></div>
+              <div class="nav-node" style="transform: rotateZ(120deg) translateY(-140px);"><a href="#scene-2">Scene 2</a></div>
+              <div class="nav-node" style="transform: rotateZ(180deg) translateY(-140px);"><a href="#scene-3">Scene 3</a></div>
+              <div class="nav-node" style="transform: rotateZ(240deg) translateY(-140px);"><a href="#scene-4">Scene 4</a></div>
+              <div class="nav-node" style="transform: rotateZ(300deg) translateY(-140px);"><a href="#scene-5">Scene 5</a></div>
+            </div>
+          </div>
+
+          <div class="nav-wheel-scene-label">Tip: Hover to pause rotation. Click any node to jump scenes.</div>
+
+          <div class="scene-nav-row">
+            <div class="scene-nav-left">
+              <button class="holo-btn small" type="button" data-nav="#title-card"><span class="chevron">◀</span> Return to Title</button>
+            </div>
+            <div class="scene-nav-right">
+              <button class="holo-btn small" type="button" data-nav="#scene-1">Start at Scene 1</button>
+              <button class="holo-btn small secondary" type="button" data-nav="#scene-3">Jump to Trip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====
+         MODAL: PROJECT R.A.T. RAPS – IN-UNIVERSE DOSSIER
+         ==== -->
+    <div class="modal-backdrop" id="rat-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Project R.A.T. Raps // Internal Dossier</div>
+            <div class="modal-badge">Alien Ship – Deck 7 / Dispatch Neuro-Lab</div>
+          </div>
+          <button class="modal-close" type="button" id="rat-modal-close" aria-label="Close Project R.A.T. Raps dossier">✕</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Designation:</strong> Routing Adaptive Transmitter – Rhythmic Augmented Patterning System (R.A.T. Raps)</p>
+          <p><strong>Origin Node:</strong> Outer Dispatch Galaxy, Gridline Sigma‑911</p>
+          <p><strong>Lead Architects:</strong> The Click-Swarm, Siren-Cluster Nine, Anonymous Alleywatcher</p>
+
+          <p><strong>Objective:</strong> Identify low-level organisms that naturally evolve route-optimization behaviors under scarcity (a.k.a. "hustlers") and repurpose their instincts into <em>universal emergency dispatch daemons</em>.</p>
+
+          <p><strong>Phase 1 – Signal Scouting:</strong></p>
+          <ul>
+            <li>Monitor fringe planets for rhythm-coded navigation patterns hidden inside music, graffiti, or food trails.</li>
+            <li>Flag entities that:
+              <ul>
+                <li>Operate in hostile, resource-starved environments.</li>
+                <li>Demonstrate distributed map-making using improvised markers (crumbs, tags, rumors).</li>
+                <li>Can hold a beat under pressure.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <p><strong>Phase 2 – Abduct & Audit:</strong></p>
+          <ul>
+            <li>Non-consensual extraction (standardized across galactic law, unfortunately).</li>
+            <li>Run subject through cognitive mazes simulating traffic jams, blackouts, and panic storms.</li>
+            <li>Measure instinctive re-routing speed vs. conventional AI latency.</li>
+          </ul>
+
+          <p><strong>Subject 0xG – "Squeaky G"</strong></p>
+          <ul>
+            <li><strong>Species:</strong> Urban Rattus with cybernetic adaptation.</li>
+            <li><strong>Traits:</strong> Territorial lyricist, crumb-cartographer, ego-saturated but coachable.</li>
+            <li><strong>Notable Finding:</strong> Subject converts hunger into pathfinding. Each "hustle" is a proof-of-concept routing algorithm.</li>
+          </ul>
+
+          <p><strong>Risk Assessment:</strong></p>
+          <ul>
+            <li>High: Subject will treat any new identity as a stage name.</li>
+            <li>Medium: Will demand style over sterile branding.</li>
+            <li>Low: Loyalty once respect is earned appears sticky.</li>
+          </ul>
+
+          <p><strong>Outcome:</strong></p>
+          <ul>
+            <li>Subject accepts emergency-routing patch after witnessing multi-world helplessness.</li>
+            <li>Hybrid designation created:
+              <ul>
+                <li><strong>Cultural Alias:</strong> "Squeaky G"</li>
+                <li><strong>Operational Call Sign:</strong> <strong>DOC911</strong></li>
+              </ul>
+            </li>
+            <li>Logline approved by council:<br />"I'm Squeaky G. Evolve now. Call me DOC911. Approved."</li>
+          </ul>
+
+          <p><strong>Implementation Notes:</strong></p>
+          <ul>
+            <li>Embed dispatch subroutines inside subject's sense of rhythm and territorial pride.</li>
+            <li>All future emergency pings in the sector will be pre-routed through DOC911's intuition layer.</li>
+            <li>If subject begins freestyling cosmic route diagrams in alleys, <em>this is expected and encouraged</em>.</li>
+          </ul>
+
+          <p class="modal-footer-note">
+            DOSSIER FOOTER: For full 20-page comic PDF, this dossier functions as a back-matter spread or in-universe appendix.
+            Export as a dedicated "CLASSIFIED" page with redacted alien stamps.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- LIGHTBOX (CLICK-TO-ZOOM) -->
+  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="lightbox-panel" role="document">
+      <div class="lightbox-topbar">
+        <div class="lightbox-title" id="lightbox-title">ZOOM VIEW</div>
+        <button class="lightbox-close" type="button" id="lightbox-close" aria-label="Close zoom">✕</button>
+      </div>
+
+      <div class="lightbox-media" id="lightbox-media">
+        <img class="lightbox-img" id="lightbox-img" alt="" />
+      </div>
+
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div>
+      © DOC911 | All Rights Reserved<br />
+      Crumbs in the Wires Initiative // Emergency Routing Folklore
+    </div>
+    <div class="footer-right">
+      Built as a single-file holo-site.<br />
+      <span>"If you hear static, I'm already on my way."</span>
+    </div>
+  </footer>
+
+  <script>
+    /* ----
+       HASH-BASED ROUTING SYSTEM
+       ---- */
+    (function () {
+      function activateRoute(hash) {
+        if (!hash || hash === "#") {
+          hash = "#title-card";
+          window.location.hash = hash;
+        }
+        var targetId = hash.replace("#", "");
+        var sections = document.querySelectorAll("section.route-section");
+        sections.forEach(function (section) {
+          if (section.id === targetId) section.classList.add("active");
+          else section.classList.remove("active");
+        });
+      }
+
+      activateRoute(window.location.hash || "#title-card");
+
+      window.addEventListener("hashchange", function () {
+        activateRoute(window.location.hash);
+      });
+
+      document.addEventListener("click", function (event) {
+        var target = event.target;
+        while (target && target !== document.body) {
+          if (target.hasAttribute("data-nav")) {
+            var navHash = target.getAttribute("data-nav");
+            if (navHash) {
+              event.preventDefault();
+              window.location.hash = navHash;
+            }
+            break;
+          }
+          target = target.parentElement;
+        }
+      });
+
+      window.__squeakyRouter = { activateRoute: activateRoute };
+    })();
+
+    /* ----
+       LOADING OVERLAY HANDLING
+       ---- */
+    (function () {
+      var overlay = document.getElementById("loading-overlay");
+      if (!overlay) return;
+
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          overlay.style.opacity = "0";
+          overlay.style.transition = "opacity 0.6s ease-out";
+          setTimeout(function () { overlay.style.display = "none"; }, 650);
+        }, 900);
+      });
+    })();
+
+    /* ----
+       AMBIENT AUDIO TOGGLE
+       ---- */
+    (function () {
+      var toggle = document.getElementById("ambient-toggle");
+      var audio = document.getElementById("ambient-audio");
+      if (!toggle || !audio) return;
+
+      var isMuted = true;
+
+      function updateToggleUI() {
+        if (isMuted) {
+          toggle.classList.add("muted");
+          toggle.setAttribute("aria-pressed", "false");
+        } else {
+          toggle.classList.remove("muted");
+          toggle.setAttribute("aria-pressed", "true");
+        }
+      }
+
+      async function setMutedState(mute) {
+        isMuted = mute;
+        updateToggleUI();
+        audio.muted = mute;
+        if (!mute) {
+          audio.volume = 0.25;
+          try { await audio.play(); } catch (e) {}
+        } else {
+          audio.pause();
+        }
+      }
+
+      toggle.addEventListener("click", function () { setMutedState(!isMuted); });
+      setMutedState(true);
+    })();
+
+    /* ----
+       PROJECT R.A.T. RAPS MODAL
+       ---- */
+    (function () {
+      var openBtn = document.getElementById("open-rat-modal");
+      var modal = document.getElementById("rat-modal");
+      var closeBtn = document.getElementById("rat-modal-close");
+      if (!modal) return;
+
+      function openModal() {
+        modal.classList.add("active");
+        modal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeModal() {
+        modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      if (openBtn) openBtn.addEventListener("click", openModal);
+      if (closeBtn) closeBtn.addEventListener("click", closeModal);
+
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) closeModal();
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.classList.contains("active")) closeModal();
+      });
+    })();
+
+    /* ----
+       LIGHTBOX (CLICK-TO-ZOOM)
+       ---- */
+    (function () {
+      var lb = document.getElementById("lightbox");
+      var lbImg = document.getElementById("lightbox-img");
+      var lbCaption = document.getElementById("lightbox-caption");
+      var lbClose = document.getElementById("lightbox-close");
+      var lastFocus = null;
+
+      if (!lb || !lbImg || !lbCaption || !lbClose) return;
+
+      function openLightbox(src, alt, caption) {
+        lastFocus = document.activeElement;
+        lbImg.src = src;
+        lbImg.alt = alt || "";
+        lbCaption.textContent = caption || "";
+        lb.classList.add("active");
+        lb.setAttribute("aria-hidden", "false");
+        document.body.classList.add("lb-open");
+        lbClose.focus();
+      }
+
+      function closeLightbox() {
+        lb.classList.remove("active");
+        lb.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("lb-open");
+        lbImg.src = "";
+        lbImg.alt = "";
+        lbCaption.textContent = "";
+        if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+      }
+
+      // Event delegation: any image with [data-lightbox]
+      document.addEventListener("click", function (e) {
+        var t = e.target;
+        if (!(t instanceof Element)) return;
+
+        if (t.matches("img[data-lightbox]")) {
+          e.preventDefault();
+          var src = t.getAttribute("src");
+          var alt = t.getAttribute("alt") || "";
+          var caption = t.getAttribute("data-caption") || alt;
+          openLightbox(src, alt, caption);
+        }
+      });
+
+      // Close button
+      lbClose.addEventListener("click", function () {
+        closeLightbox();
+      });
+
+      // Backdrop click (click outside the panel)
+      lb.addEventListener("click", function (e) {
+        if (e.target === lb) closeLightbox();
+      });
+
+      // ESC key
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && lb.classList.contains("active")) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
