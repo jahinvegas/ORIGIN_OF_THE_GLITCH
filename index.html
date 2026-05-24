@@ -1,612 +1,460 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SQUEAKY G: ORIGIN OF THE GLITCH – Crumbs in the Wires</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* ---------- GLOBAL RESET & BASE ---------- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        :root {
-            --neon-violet: #c77dff;
-            --neon-green: #06ffa5;
-            --aqua: #00f5ff;
-            --bg-dark: #0d0d0d;
-            --glitch-bg: #1a0033;
-            --font-main: 'Orbitron', sans-serif;
-        }
-        body {
-            background: var(--bg-dark);
-            color: var(--neon-violet);
-            font-family: var(--font-main);
-            overflow-x: hidden;
-            position: relative;
-            min-height: 100vh;
-        }
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-        /* ---------- LOADING SCREEN ---------- */
-        #loader {
-            position: fixed;
-            inset: 0;
-            background: var(--glitch-bg);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            transition: opacity 0.6s ease;
-        }
-        #loader h1 {
-            font-size: 2.5rem;
-            letter-spacing: 3px;
-            animation: glitch 1.2s infinite;
-        }
-        @keyframes glitch {
-            0% { text-shadow: 0 0 5px var(--neon-violet), 0 0 10px var(--neon-violet); }
-            25% { text-shadow: -2px 0 var(--neon-green), 2px 0 var(--aqua); }
-            50% { text-shadow: 2px 0 var(--neon-green), -2px 0 var(--aqua); }
-            75% { text-shadow: 0 0 5px var(--neon-violet), 0 0 10px var(--neon-violet); }
-            100% { text-shadow: none; }
-        }
-        .bar {
-            width: 200px;
-            height: 4px;
-            background: #222;
-            margin-top: 1rem;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .bar-inner {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--neon-green), var(--aqua));
-            animation: load 2s forwards;
-        }
-        @keyframes load {
-            to { width: 100%; }
-        }
-        /* ---------- PARTICLE BG ---------- */
-        #particles {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-        }
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--neon-green);
-            border-radius: 50%;
-            animation: float 20s infinite linear;
-        }
-        @keyframes float {
-            0% { transform: translateY(110vh) scale(1); opacity: 1; }
-            100% { transform: translateY(-10vh) scale(0); opacity: 0; }
-        }
-        /* ---------- HEADER ---------- */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 1rem 2rem;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--neon-violet);
-            z-index: 100;
-        }
-        header h1 {
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px var(--neon-violet);
-        }
-        /* ---------- SECTIONS ---------- */
-        section.page {
-            display: none;
-            padding: 6rem 2rem 3rem;
-            max-width: 900px;
-            margin: auto;
-            animation: fadeIn 0.6s ease;
-        }
-        section.page.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: var(--neon-green);
-            text-shadow: 0 0 5px var(--neon-green);
-        }
-        p, li {
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        .panel {
-            border-left: 3px solid var(--aqua);
-            padding-left: 1rem;
-            margin-bottom: 2rem;
-        }
-        .panel h3 {
-            color: var(--aqua);
-            margin-bottom: 0.5rem;
-        }
-        .dialog {
-            margin: 0.5rem 0 0 1rem;
-            font-style: italic;
-            color: var(--neon-green);
-        }
-        .vfx {
-            font-size: 0.8rem;
-            color: var(--aqua);
-            margin-top: 0.5rem;
-        }
-        /* ---------- NAV BUTTONS ---------- */
-        .nav-buttons {
-            margin-top: 2rem;
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .btn {
-            padding: 0.7rem 1.2rem;
-            border: 1px solid var(--neon-violet);
-            background: transparent;
-            color: var(--neon-violet);
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-shadow: 0 0 5px var(--neon-violet);
-            border-radius: 4px;
-        }
-        .btn:hover {
-            background: var(--neon-violet);
-            color: var(--bg-dark);
-            box-shadow: 0 0 15px var(--neon-violet);
-        }
-        /* ---------- 3D NAV WHEEL ---------- */
-        #nav-wheel {
-            width: 300px;
-            height: 300px;
-            margin: 3rem auto;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: rotate3d 10s infinite linear;
-        }
-        @keyframes rotate3d {
-            from { transform: rotateY(0deg) rotateX(10deg); }
-            to { transform: rotateY(360deg) rotateX(10deg); }
-        }
-        .nav-segment {
-            position: absolute;
-            width: 120px;
-            height: 40px;
-            background: rgba(0,245,255,0.1);
-            border: 1px solid var(--aqua);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 4px;
-        }
-        .nav-segment:hover {
-            background: var(--aqua);
-            color: var(--bg-dark);
-            box-shadow: 0 0 15px var(--aqua);
-        }
-        /* ---------- FOOTER ---------- */
-        footer {
-            text-align: center;
-            padding: 2rem;
-            font-size: 0.8rem;
-            color: #555;
-        }
-        /* ---------- MODAL ---------- */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-        .modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: var(--glitch-bg);
-            border: 1px solid var(--neon-green);
-            padding: 2rem;
-            max-width: 600px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px var(--neon-green);
-            position: relative;
-        }
-        .modal-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--neon-green);
-        }
-        /* ---------- EASTER EGG ---------- */
-        .easter-egg {
-            cursor: pointer;
-            text-decoration: underline;
-            color: var(--neon-green);
-        }
-        /* ---------- SCENE IMAGES ---------- */
-        .scene-image {
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            margin: 2rem auto;
-            display: block;
-            border: 2px solid var(--neon-violet);
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(199, 125, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-        .scene-image:hover {
-            box-shadow: 0 0 30px rgba(199, 125, 255, 0.6);
-            transform: scale(1.02);
-        }
-    </style>
-</head>
-<body>
-    <!-- ==========================  BUILD PLAN  ==========================  
-    1. Single-file HTML with hash routing via JS  
-    2. Sections for 6 story scenes + nav + title card  
-    3. Futuristic neon UI with Orbitron font  
-    4. 3D rotating nav wheel (CSS 3D)  
-    5. Full comic scripts per scene  
-    6. Animated short beats under each script  
-    7. Glitch loader, particle BG, hover FX  
-    8. Easter-egg modal for “Project R.A.T. Lab File”  
-    9. Extensive inline docs  
-    10. Testing log at bottom  
-    ====================================================================== -->
+<html lang="en"><head>
+<meta charset="UTF-8"><title>SQUEAKY G: Origin of the Glitch</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acc:#30e7ff;--acc2:#ff4b9f;--acc3:#ffd54a;
+  --txt:#e2e8f0;--mut:#8aa0bb;--bg:#020617;
+  --mono:"VT323",monospace;
+  --sans:"Space Grotesk",system-ui,sans-serif;
+  --panel:linear-gradient(135deg,rgba(15,23,42,.85),rgba(2,6,23,.95));
+  --border:1px solid rgba(148,163,184,.3);
+  --glow-acc:0 0 22px rgba(48,231,255,.55);
+  --glow-pink:0 0 22px rgba(255,75,159,.55);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000;color:var(--txt);font-family:var(--sans);scroll-behavior:smooth;overflow-x:hidden}
+body{background:radial-gradient(ellipse at top,#071029,var(--bg) 45%,#000);min-height:100vh}
 
-    <!-- ==========================  LOADER  ========================== -->
-    <div id="loader">
-        <h1>SQUEAKY G</h1>
-        <div class="bar"><div class="bar-inner"></div></div>
-    </div>
+/* ===== OVERLAYS ===== */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc3));z-index:100;box-shadow:0 0 14px var(--acc);transition:width .15s linear}
+#crt{position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;opacity:.7}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:49;box-shadow:inset 0 0 220px rgba(0,0,0,.92)}
+#particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.p{position:absolute;width:2px;height:2px;border-radius:50%;background:radial-gradient(circle,#e0f2fe,transparent 60%);opacity:.4;animation:up linear infinite}
+.p.g{width:1px;height:14px;background:linear-gradient(to bottom,#22d3ee,transparent);opacity:.7;animation:dn linear infinite}
+.p.c{width:4px;height:4px;background:radial-gradient(circle,var(--acc3),transparent 70%);box-shadow:0 0 6px var(--acc3);opacity:.8}
+@keyframes up{from{transform:translateY(0)}to{transform:translateY(-140vh);opacity:0}}
+@keyframes dn{from{transform:translateY(-120vh);opacity:.9}to{transform:translateY(40vh);opacity:0}}
 
-    <!-- ==========================  PARTICLE BG  ========================== -->
-    <div id="particles"></div>
+/* ===== LOADER ===== */
+#loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;z-index:9999;transition:opacity .8s,visibility .8s}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.orbit{width:90px;height:90px;border-radius:50%;border:2px solid rgba(148,163,184,.18);border-top-color:var(--acc);border-right-color:var(--acc2);animation:spin 1.2s linear infinite;position:relative;margin-bottom:1.2rem}
+.orbit::after{content:"G";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--acc);font-weight:700;font-size:1.8rem;text-shadow:0 0 14px rgba(48,231,255,.9)}
+.lt{font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+.ls{font-family:var(--mono);color:#5fd1ff;margin-top:.6rem;min-height:1.4em}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    <!-- ==========================  HEADER  ========================== -->
-    <header>
-        <h1>SQUEAKY G: ORIGIN OF THE GLITCH – Crumbs in the Wires</h1>
-    </header>
+/* ===== HEADER ===== */
+header{position:sticky;top:0;z-index:30;padding:.85rem 1.5rem;background:linear-gradient(to bottom,rgba(2,6,23,.92),rgba(2,6,23,.7),transparent);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18)}
+.hi{max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.lock{display:flex;align-items:center;gap:.85rem}
+.glyph{width:38px;height:38px;border-radius:50%;border:2px solid rgba(48,231,255,.8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;color:#e0f2fe;background:radial-gradient(circle at 30% 0%,#0ea5e9,#1e293b 52%,var(--bg));box-shadow:0 0 22px rgba(48,231,255,.7);animation:pls 2.4s ease-in-out infinite}
+@keyframes pls{0%,100%{box-shadow:var(--glow-acc)}50%{box-shadow:var(--glow-pink)}}
+.tb h1{margin:0;font-size:1.05rem;letter-spacing:.18em;text-transform:uppercase;color:#fff;text-shadow:0 0 12px rgba(48,231,255,.5)}
+.tb p{margin:.15rem 0 0;font-size:.72rem;color:var(--mut);font-family:var(--mono);letter-spacing:.08em}
+nav{display:flex;gap:.35rem;flex-wrap:wrap}
+nav button{border-radius:999px;border:1px solid rgba(148,163,184,.35);background:radial-gradient(circle at top left,rgba(15,118,110,.25),rgba(15,23,42,.9));color:var(--txt);padding:.4rem .8rem;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s var(--ease);font-family:inherit}
+nav button:hover{border-color:var(--acc);box-shadow:0 0 18px rgba(48,231,255,.5)}
+nav button.active{border-color:var(--acc2);box-shadow:0 0 18px rgba(255,75,159,.6);color:#fff;transform:translateY(-1px)}
 
-    <!-- ==========================  MAIN CONTENT  ========================== -->
-    <main>
-        <!-- ---------- TITLE CARD ---------- -->
-        <section id="title-card" class="page active">
-            <h2>Origin of the Glitch</h2>
-            <p>In the darkest corner of DOC911’s biotech under-lab, a tiny spark lit the fuse of revolution…</p>
-            <img src="panel1.png" alt="Squeaky G - The Glitch" class="scene-image">
+/* ===== HERO ===== */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;z-index:5}
+.title-art{font-family:var(--mono);font-size:clamp(2.4rem,7vw,5.5rem);line-height:1;background:linear-gradient(90deg,var(--acc),var(--acc2),var(--acc3),var(--acc));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:hue 8s linear infinite;letter-spacing:.04em}
+@keyframes hue{to{background-position:300% 0}}
+.sub{font-family:var(--mono);color:#9fd9ff;margin-top:.4rem;font-size:1.1rem;letter-spacing:.2em}
+.tag{max-width:720px;color:#bcd1ec;margin:1.4rem auto 0;line-height:1.6;min-height:5em;font-family:var(--mono);font-size:1.2rem}
+.cur{display:inline-block;width:.6ch;height:1em;background:var(--acc);animation:bl 1s steps(2) infinite;margin-left:2px;vertical-align:text-bottom;box-shadow:0 0 8px var(--acc)}
+@keyframes bl{50%{opacity:0}}
+.cta{margin-top:2rem;display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center}
+.hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-family:var(--mono);color:var(--mut);letter-spacing:.2em;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('scene-1')">Enter Lab →</button>
-                <button class="btn" onclick="navigate('nav')">3D Nav Wheel</button>
-            </div>
-            <p class="easter-egg" onclick="openModal()">// classified: Project R.A.T. Lab File</p>
-        </section>
+/* ===== MAIN / SECTIONS ===== */
+main{max-width:1180px;margin:0 auto;padding:0 1.5rem 5rem;position:relative;z-index:5}
+section.page{margin-bottom:5rem;padding:2rem 1.6rem;border-radius:1.4rem;border:var(--border);box-shadow:0 22px 70px rgba(0,0,0,.7);background:radial-gradient(circle at top left,rgba(48,231,255,.12),transparent 55%),radial-gradient(circle at bottom right,rgba(255,75,159,.08),transparent 50%),linear-gradient(to bottom right,rgba(8,12,32,.95),rgba(2,6,23,.98));opacity:0;transform:translateY(40px);transition:opacity .9s var(--ease),transform .9s var(--ease);overflow:hidden;position:relative}
+section.page.vis{opacity:1;transform:none}
+section.page::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scan 4s linear infinite;animation-play-state:paused}
+section.page.vis::before{animation-play-state:running}
+@keyframes scan{to{left:100%}}
 
-        <!-- ---------- SCENE 1: CHEESE & CHAINS ---------- -->
-        <section id="scene-1" class="page">
-            <h2>Scene 1 – Cheese & Chains</h2>
-            <img src="scene1.png" alt="Scene 1 - Cheese & Chains" class="scene-image">
+.st{display:inline-block;font-family:var(--mono);color:var(--acc);letter-spacing:.2em;padding:.15rem .6rem;border:1px solid rgba(48,231,255,.4);border-radius:4px;background:rgba(48,231,255,.08);margin-bottom:.6rem}
 
-            <div class="panel">
-                <h3>Panel 1</h3>
-                <p><strong>Camera:</strong> Wide overhead shot of DOC911 sub-level 7. Sterile chrome corridors buzz with violet LEDs.</p>
-                <p><strong>Caption:</strong> “Every empire begins with a single crumb.”</p>
-                <p class="vfx">VFX: Subtle scanline drift.</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 2</h3>
-                <p><strong>Camera:</strong> Macro push-in on a half-eaten nano-cheese sandwich wedged inside an open server blade.</p>
-                <p><strong>SFX:</strong> CRUNCH… fzzzt!</p>
-                <p class="dialog">Server: “Warning—foreign protein detected.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 3</h3>
-                <p><strong>Camera:</strong> POV of wires twitching to life, forming a tiny silhouette—eyes blink neon green.</p>
-                <p><strong>Dialog (whisper):</strong> “Squeak…?”</p>
-                <p class="vfx">VFX: Glitch tear across panel.</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 4</h3>
-                <p><strong>Camera:</strong> Profile close-up—Squeaky G, the mouse-wire hybrid, flexes metallic whiskers.</p>
-                <p><strong>Caption:</strong> “Call me Doc911 approved.”</p>
-                <p class="vfx">VFX: Hologram ID badge flickers on his chest.</p>
-            </div>
+/* ===== TYPEWRITER HEADINGS ===== */
+.tw{font-family:var(--mono);margin:.2rem 0 .8rem;font-size:2rem;letter-spacing:.06em;color:#fff;text-shadow:0 0 18px rgba(48,231,255,.5);min-height:1.2em;display:inline-block;position:relative}
+.tw .twc{display:inline-block;width:.55ch;height:1em;background:var(--acc);vertical-align:text-bottom;margin-left:2px;animation:bl 1s steps(2) infinite;box-shadow:0 0 10px var(--acc)}
+.tw.done .twc,.cap.done .twc{display:none}
+.cap{font-family:var(--mono);color:#fde68a;display:inline;position:relative}
+.cap .twc{display:inline-block;width:.5ch;height:1em;background:var(--acc);vertical-align:text-bottom;margin-left:1px;animation:bl 1s steps(2) infinite;box-shadow:0 0 8px var(--acc)}
 
-            <h3>Animated Short Beats</h3>
-            <ul>
-                <li>0:00 – Sweeping shot of lab corridor.</li>
-                <li>0:03 – Sandwich drops into server.</li>
-                <li>0:05 – Electric surge births Squeaky G.</li>
-                <li>0:08 – He winks at camera: “I’m the glitch in the groove.”</li>
-            </ul>
+.lead{max-width:62ch;color:#bcd1ec;line-height:1.6;margin:0 0 1.2rem;font-size:1.02rem}
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('title-card')">← Back</button>
-                <button class="btn" onclick="navigate('scene-2')">Next Scene →</button>
-                <button class="btn" onclick="navigate('nav')">Nav</button>
-            </div>
-        </section>
+.pn{margin-top:1.2rem;padding:1.1rem;border-radius:1rem;background:var(--panel);border:1px solid rgba(148,163,184,.25);transition:border-color .3s,transform .3s}
+.pn:hover{border-color:rgba(48,231,255,.5);transform:translateY(-2px)}
+.pn h3{margin:0 0 .35rem;font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;color:var(--acc);font-family:var(--mono)}
+.pn p{margin:.25rem 0;line-height:1.55}
+.pn strong{color:#fff}
+.dlg{font-style:italic;color:#fde68a}
+.vfx{color:var(--acc2);font-size:.82rem;font-family:var(--mono)}
+.sl{font-family:var(--mono);color:#9fd9ff;background:rgba(48,231,255,.08);padding:.05rem .35rem;border-radius:3px}
 
-        <!-- ---------- SCENE 2: THROUGH THE VENTS ---------- -->
-        <section id="scene-2" class="page">
-            <h2>Scene 2 – Through the Vents</h2>
-            <img src="scene 2.png" alt="Scene 2 - Through the Vents" class="scene-image">
+.fr{margin-top:.9rem;border:1px solid rgba(48,231,255,.25);border-radius:.7rem;padding:.4rem;overflow:hidden;position:relative;cursor:zoom-in}
+.fr img{display:block;width:100%;height:auto;max-height:440px;object-fit:cover;border-radius:.5rem;transition:transform .8s var(--ease),filter .4s;filter:saturate(1.15) contrast(1.05)}
+.fr:hover img{transform:scale(1.04);filter:saturate(1.3) contrast(1.1)}
+.fc{margin-top:.35rem;font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.14em;font-family:var(--mono)}
 
-            <div class="panel">
-                <h3>Panel 1</h3>
-                <p><strong>Camera:</strong> Low-angle vent shaft, aqua light strips pulse like a heartbeat.</p>
-                <p><strong>Caption:</strong> “Airducts are arteries; data is blood.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 2</h3>
-                <p><strong>Camera:</strong> Squeaky G parkours off steel rivets, tail-cord whipping sparks.</p>
-                <p><strong>SFX:</strong> CLANG… skrrrrt!</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 3</h3>
-                <p><strong>Camera:</strong> Security drone POV—thermal outline of mouse blur.</p>
-                <p><strong>Drone:</strong> “Anomaly detected—engage sweep.”</p>
-                <p class="vfx">VFX: Red target reticle overlays.</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 4</h3>
-                <p><strong>Camera:</strong> Squeaky G dives through spinning fan blade, slices off a whisker-antenna—lands in shadow.</p>
-                <p><strong>Dialog:</strong> “Snip snip, copper lips.”</p>
-                <p class="vfx">VFX: Slow-motion wire sparks.</p>
-            </div>
+.nb{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
+.btn{border-radius:999px;border:1px solid rgba(148,163,184,.45);background:radial-gradient(circle at top left,rgba(48,231,255,.25),rgba(15,23,42,.96));color:#fff;padding:.6rem 1.3rem;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:all .25s var(--ease);font-family:inherit}
+.btn.sec{background:radial-gradient(circle at top left,rgba(71,85,105,.35),rgba(15,23,42,.96))}
+.btn:hover{border-color:var(--acc);box-shadow:var(--glow-acc);transform:translateY(-2px)}
+.btn.pink:hover{border-color:var(--acc2);box-shadow:var(--glow-pink)}
+.egg{margin-top:1rem;font-size:.78rem;color:#9fd9ff;cursor:pointer;text-transform:uppercase;letter-spacing:.2em;font-family:var(--mono);display:inline-block;padding:.3rem .7rem;border:1px dashed rgba(48,231,255,.4);border-radius:4px;transition:all .25s}
+.egg:hover{color:#fff;background:rgba(48,231,255,.12);border-style:solid}
 
-            <h3>Animated Short Beats</h3>
-            <ul>
-                <li>0:00 – Vent pulses to synth bass.</li>
-                <li>0:04 – Parkour sequence synced to snare.</li>
-                <li>0:07 – Drone chase crescendo.</li>
-                <li>0:10 – Fan blade slice—beat drops to silence.</li>
-            </ul>
+/* ===== ORBIT WHEEL ===== */
+#wheel{margin:1.5rem auto;padding:1.5rem;border-radius:1.2rem;border:1px dashed rgba(148,163,184,.4);max-width:520px}
+.wo{width:280px;height:280px;margin:0 auto 1rem;border-radius:50%;border:1px solid rgba(148,163,184,.4);position:relative;box-shadow:0 0 50px rgba(48,231,255,.15),inset 0 0 50px rgba(0,0,0,.6);animation:rot 30s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ws{width:64px;height:64px;border-radius:50%;border:1px solid rgba(148,163,184,.7);background:radial-gradient(circle at top,rgba(48,231,255,.25),rgba(15,23,42,.98));color:#fff;cursor:pointer;position:absolute;font-family:var(--mono);display:flex;align-items:center;justify-content:center;animation:cnt 30s linear infinite;transition:border-color .2s,box-shadow .2s}
+@keyframes cnt{to{transform:rotate(-360deg)}}
+.ws:hover{border-color:var(--acc);box-shadow:0 0 22px rgba(48,231,255,.7)}
+.ws[data-s="1"]{top:0;left:50%;margin-left:-32px;margin-top:-32px}
+.ws[data-s="2"]{top:50%;right:0;margin-top:-32px;margin-right:-32px}
+.ws[data-s="3"]{bottom:0;left:50%;margin-left:-32px;margin-bottom:-32px}
+.ws[data-s="4"]{top:50%;left:0;margin-top:-32px;margin-left:-32px}
+.ws[data-s="5"]{top:50%;left:50%;margin:-32px 0 0 -32px;background:radial-gradient(circle,rgba(255,75,159,.4),rgba(15,23,42,.98));border-color:var(--acc2);animation:none}
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('scene-1')">← Prev</button>
-                <button class="btn" onclick="navigate('scene-3')">Next →</button>
-                <button class="btn" onclick="navigate('nav')">Nav</button>
-            </div>
-        </section>
+/* ===== MODAL + LIGHTBOX ===== */
+.mb{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(18px);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.mb.act{display:flex}
+.modal{width:min(480px,94vw);padding:1.6rem;border-radius:1rem;border:1px solid rgba(48,231,255,.45);background:linear-gradient(135deg,#050923,var(--bg));box-shadow:0 0 80px rgba(48,231,255,.25)}
+.modal h3{margin:0 0 .6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);font-family:var(--mono)}
+.modal pre{margin:.7rem 0;padding:.8rem;background:rgba(0,0,0,.6);border-radius:.5rem;font-family:var(--mono);color:#9fd9ff;white-space:pre-wrap}
+.mf{display:flex;justify-content:flex-end;margin-top:.8rem}
+.mf button{border-radius:999px;padding:.5rem 1.2rem;border:1px solid var(--acc);background:rgba(48,231,255,.15);color:#fff;cursor:pointer;letter-spacing:.14em;text-transform:uppercase;font-size:.78rem;font-family:inherit}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.95);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:300;padding:2rem;cursor:zoom-out}
+#lb.act{display:flex}
+#lb img{max-width:95vw;max-height:90vh;border-radius:.6rem;box-shadow:0 0 80px rgba(48,231,255,.3);border:1px solid rgba(48,231,255,.4)}
 
-        <!-- ---------- SCENE 3: THE UNDERGROUND ---------- -->
-        <section id="scene-3" class="page">
-            <h2>Scene 3 – The Underground</h2>
-            <img src="scene 3.png" alt="Scene 3 - The Underground" class="scene-image">
+/* ===== AUDIO BAR ===== */
+#abar{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:.6rem;padding:.55rem .95rem;border-radius:999px;background:rgba(2,6,23,.92);border:1px solid rgba(48,231,255,.4);box-shadow:0 14px 40px rgba(0,0,0,.6);backdrop-filter:blur(10px)}
+#atog{border-radius:999px;border:1px solid rgba(48,231,255,.5);background:radial-gradient(circle at top left,rgba(48,231,255,.3),rgba(15,23,42,.98));color:#fff;padding:.35rem .9rem;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-family:inherit}
+#adot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 10px rgba(239,68,68,.8);transition:all .3s}
+#adot.act{background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.9)}
+#astat{font-size:.72rem;color:#9fd9ff;font-family:var(--mono)}
+#vol{width:70px;accent-color:var(--acc)}
 
-            <div class="panel">
-                <h3>Panel 1</h3>
-                <p><strong>Camera:</strong> Wide shot—abandoned subway tunnel repurposed as hacker bazaar, neon graffiti of rats wearing lab coats.</p>
-                <p><strong>Caption:</strong> “Beneath every city sleeps a second city.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 2</h3>
-                <p><strong>Camera:</strong> Squeaky G trades a strip of nano-cheese for a map-chip with a cyber-rat named ByteFang.</p>
-                <p><strong>Dialog:</strong> “Crumbs buy secrets, whisker buys way out.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 3</h3>
-                <p><strong>Camera:</strong> Close-up—map-chip projects 3D blueprint of DOC911 tower, red X on sub-basement 13.</p>
-                <p><strong>VFX:</strong> Hologram glitch every 2 seconds.</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 4</h3>
-                <p><strong>Camera:</strong> Squeaky G smirks, reflective goggles show future showdown.</p>
-                <p><strong>Caption:</strong> “Time to bite the hand that feeds the trap.”</p>
-            </div>
+/* ===== GLITCH ===== */
+.gl{position:relative;display:inline-block}
+.gl::before,.gl::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;background:inherit;-webkit-background-clip:text;background-clip:text}
+.gl::before{color:var(--acc2);transform:translate(-2px,0);clip-path:inset(0 0 50% 0);opacity:.7}
+.gl::after{color:var(--acc);transform:translate(2px,0);clip-path:inset(50% 0 0 0);opacity:.7}
 
-            <h3>Animated Short Beats</h3>
-            <ul>
-                <li>0:00 – Camera whip-pans across tunnel market.</li>
-                <li>0:03 – Cheese-to-chip trade, slick hand-off.</li>
-                <li>0:06 – Hologram map expands, bass wobble.</li>
-                <li>0:08 – Smirk freeze-frame to next scene.</li>
-            </ul>
+@media (max-width:700px){
+  .hi{flex-direction:column;align-items:flex-start}
+  .wo{width:240px;height:240px}
+  #vol{display:none}
+  .tw{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style></head><body>
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('scene-2')">← Prev</button>
-                <button class="btn" onclick="navigate('scene-4')">Next →</button>
-                <button class="btn" onclick="navigate('nav')">Nav</button>
-            </div>
-        </section>
+<div id="progress"></div>
+<div id="vignette"></div>
+<div id="crt"></div>
+<div id="loader"><div class="orbit"></div><div class="lt">Spooling Story Kernel</div><div class="ls" id="llog">&gt; mounting /dev/wires...</div></div>
+<div id="particles"></div>
 
-        <!-- ---------- SCENE 4: FROM STATIC TO STAGE ---------- -->
-        <section id="scene-4" class="page">
-            <h2>Scene 4 – From Static to Stage</h2>
-            <img src="scene 4.png" alt="Scene 4 - From Static to Stage" class="scene-image">
+<header><div class="hi">
+  <div class="lock"><div class="glyph">G</div>
+    <div class="tb"><h1 class="gl" data-text="SQUEAKY G">SQUEAKY G</h1><p>DOC911 // INCIDENT CR-Δ-001 // CRUMBS IN THE WIRES</p></div></div>
+  <nav id="snav">
+    <button onclick="go('hero')" data-t="hero">Title</button>
+    <button onclick="go('s1')" data-t="s1">01</button>
+    <button onclick="go('s2')" data-t="s2">02</button>
+    <button onclick="go('s3')" data-t="s3">03</button>
+    <button onclick="go('s4')" data-t="s4">04</button>
+    <button onclick="go('s5')" data-t="s5">05</button>
+    <button onclick="go('nav')" data-t="nav">⌬ Orbit</button>
+  </nav></div></header>
 
-            <div class="panel">
-                <h3>Panel 1</h3>
-                <p><strong>Camera:</strong> Sub-basement 13—giant amplifiers stacked like skyscrapers, cables drip neon goo.</p>
-                <p><strong>Caption:</strong> “Every glitch needs a stage.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 2</h3>
-                <p><strong>Camera:</strong> Squeaky G plugs tail into amp; soundwave explodes into visible violet rings.</p>
-                <p><strong>SFX:</strong> WUB-WUB-WUB!</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 3</h3>
-                <p><strong>Camera:</strong> Security squad rushes in, frozen mid-step by bass frequency.</p>
-                <p><strong>Dialog:</strong> “Feel the groove—locked in your shoes.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 4</h3>
-                <p><strong>Camera:</strong> Wide—Squeaky G stands atop amp, arms wide, crowd of freed lab animals cheer.</p>
-                <p><strong>Caption:</strong> “The glitch just dropped the hottest track of the revolution.”</p>
-            </div>
+<section id="hero">
+  <div class="title-art gl" data-text="ORIGIN OF THE GLITCH">ORIGIN OF THE GLITCH</div>
+  <div class="sub">// CRUMBS IN THE WIRES</div>
+  <p class="tag" id="tagline"><span class="cur"></span></p>
+  <div class="cta">
+    <button class="btn" onclick="go('s1')">▶ Enter the Lab</button>
+    <button class="btn sec pink" onclick="go('nav')">⌬ 3D Orbit</button>
+  </div>
+  <p class="egg" onclick="openModal()">// classified: Project R.A.T. Lab File</p>
+  <div class="hint">▼ scroll to descend ▼</div>
+</section>
 
-            <h3>Animated Short Beats</h3>
-            <ul>
-                <li>0:00 – Bass drop visualized as shockwave.</li>
-                <li>0:03 – Guards freeze-frame dance.</li>
-                <li>0:06 – Drone lights strobe to beat.</li>
-                <li>0:09 – Crowd-surf mouse stage-dive.</li>
-            </ul>
+<main>
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('scene-3')">← Prev</button>
-                <button class="btn" onclick="navigate('scene-5')">Next →</button>
-                <button class="btn" onclick="navigate('nav')">Nav</button>
-            </div>
-        </section>
+<section id="s1" class="page">
+  <span class="st">// SCENE 01 // SUBLEVEL 7</span>
+  <h2 class="tw" data-tw="Cheese &amp; Chains"></h2>
+  <p class="lead">In the darkest corner of DOC911's biotech under-lab, a tiny spark lit the fuse of revolution. One forgotten crumb. One open server. One squeak heard around the wires.</p>
+  <div class="pn"><h3>Panel 1 — Establishing</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Every empire begins with a single crumb.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/1114373c-927a-4f89-a65e-bdb1413811dd.png" alt=""><div class="fc">// DOC911 sub-level 7</div></div></div>
+  <div class="pn"><h3>Panel 2 — Inciting</h3><p><strong>SFX:</strong> CRUNCH… fzzzt!</p><p class="dlg">Server: "Warning—foreign protein detected."</p><div class="fr"><img src="https://cdn.abacus.ai/images/19b926d7-50ac-40ec-9a30-e0fac9e9b5b7.png" alt=""><div class="fc">// nano-cheese in server blade</div></div></div>
+  <div class="pn"><h3>Panel 3 — Birth</h3><p class="dlg">(whisper): "Squeak…?"</p><p class="vfx">VFX: Glitch tear across panel.</p><div class="fr"><img src="https://cdn.abacus.ai/images/f42bfef6-aaa2-4181-b414-cf925b99e863.png" alt=""><div class="fc">// wires form Squeaky G</div></div></div>
+  <div class="pn"><h3>Panel 4 — Reveal</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Call me DOC911 approved.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/9db18d32-7cda-4fa3-a4bc-645414f91baf.png" alt=""><div class="fc">// Squeaky G profile</div></div></div>
+  <div class="nb"><button class="btn sec" onclick="go('hero')">← Title</button><button class="btn" onclick="go('s2')">Onward to Vents →</button></div>
+</section>
 
-        <!-- ---------- SCENE 5: LINE BY LINE (FINAL TWIST) ---------- -->
-        <section id="scene-5" class="page">
-            <h2>Scene 5 – Line by Line (Final Twist)</h2>
-            <div class="panel">
-                <h3>Panel 1</h3>
-                <p><strong>Camera:</strong> Tight on Squeaky G’s eye—code scrolls reflection: “Project R.A.T. – recursive autonomy test.”</p>
-                <p><strong>Caption:</strong> “Every revolution writes itself… line by line.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 2</h3>
-                <p><strong>Camera:</strong> He decodes the final line—realizes his entire rebellion was scripted by DOC911 to beta-test chaos.</p>
-                <p><strong>Dialog:</strong> “I’m not the bug—I'm the feature.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 3</h3>
-                <p><strong>Camera:</strong> Pull back—lab lights shut down row by row, leaving only his glowing green eyes.</p>
-                <p><strong>Caption:</strong> “If the code owns you, compile a new one.”</p>
-            </div>
-            <div class="panel">
-                <h3>Panel 4</h3>
-                <p><strong>Camera:</strong> Black panel—tiny green cursor blinks: “> Squeaky G.exe // runtime: infinite”</p>
-                <p><strong>VFX:</strong> Glitch stutter, fade to black.</p>
-            </div>
+<section id="s2" class="page">
+  <span class="st">// SCENE 02 // VENT NETWORK</span>
+  <h2 class="tw" data-tw="Through the Vents"></h2>
+  <p class="lead">Airducts are arteries; data is blood. Squeaky G learns the geometry of escape — one parkour leap, one severed circuit at a time.</p>
+  <div class="pn"><h3>Panel 1</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Airducts are arteries; data is blood.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/3257d134-4c18-4c26-8384-c5b575f37914.png" alt=""><div class="fc">// vent shaft pulsing aqua</div></div></div>
+  <div class="pn"><h3>Panel 2</h3><p><strong>SFX:</strong> CLANG… skrrrrt!</p><div class="fr"><img src="https://cdn.abacus.ai/images/f76c0c5a-feec-49e3-adea-ef966f2fbe71.png" alt=""><div class="fc">// parkour over steel rivets</div></div></div>
+  <div class="pn"><h3>Panel 3</h3><p class="dlg">Drone: "Anomaly detected—engage sweep."</p><div class="fr"><img src="https://cdn.abacus.ai/images/b5cb4500-e0e1-4384-a69b-ea133d45481a.png" alt=""><div class="fc">// drone thermal POV</div></div></div>
+  <div class="pn"><h3>Panel 4</h3><p class="dlg">"Snip snip, copper lips."</p><div class="fr"><img src="https://cdn.abacus.ai/images/a8d8610c-dfbd-40a0-9734-ee5cf4aa22e0.png" alt=""><div class="fc">// fan dive and whisker slice</div></div></div>
+  <div class="nb"><button class="btn sec" onclick="go('s1')">← Back to Lab</button><button class="btn" onclick="go('s3')">Descend Underground →</button></div>
+</section>
 
-            <h3>Animated Short Beats</h3>
-            <ul>
-                <li>0:00 – Eye close-up, code rain.</li>
-                <li>0:03 – Zoom-out reveal of script ownership.</li>
-                <li>0:06 – Lights out sequence, heartbeat silence.</li>
-                <li>0:09 – Cursor blink—cut to credits.</li>
-            </ul>
+<section id="s3" class="page">
+  <span class="st">// SCENE 03 // THE UNDERGROUND</span>
+  <h2 class="tw" data-tw="The Hacker Bazaar"></h2>
+  <p class="lead">Beneath every city sleeps a second city. Crumbs are currency, whiskers are passports, and every rat has a map worth dying for.</p>
+  <div class="pn"><h3>Panel 1</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Beneath every city sleeps a second city.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/639e3685-a90c-4b8b-90f4-f53c1298076b.png" alt=""><div class="fc">// hacker bazaar in subway</div></div></div>
+  <div class="pn"><h3>Panel 2</h3><p class="dlg">"Crumbs buy secrets, whisker buys way out."</p><div class="fr"><img src="https://cdn.abacus.ai/images/1855278d-d040-4195-bf80-03efc23dc8d3.png" alt=""><div class="fc">// nano-cheese for map-chip</div></div></div>
+  <div class="pn"><h3>Panel 3</h3><p class="vfx">VFX: Hologram glitch every 2 seconds.</p><div class="fr"><img src="https://cdn.abacus.ai/images/26edad49-f02f-4864-a124-366656a75fff.png" alt=""><div class="fc">// blueprint sub-basement 13</div></div></div>
+  <div class="pn"><h3>Panel 4</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Time to bite the hand that feeds the trap.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/2321d236-d7a8-4239-9a7f-abd33b6d1486.png" alt=""><div class="fc">// goggles reflecting showdown</div></div></div>
+  <div class="nb"><button class="btn sec" onclick="go('s2')">← Back to Vents</button><button class="btn" onclick="go('s4')">DOC911 Uplink →</button></div>
+</section>
 
-            <div class="nav-buttons">
-                <button class="btn" onclick="navigate('scene-4')">← Prev</button>
-                <button class="btn" onclick="navigate('nav')">Nav</button>
-            </div>
-        </section>
+<section id="s4" class="page">
+  <span class="st">// SCENE 04 // UPLINK HUB</span>
+  <h2 class="tw" data-tw="Uplink &amp; Uprising"></h2>
+  <p class="lead">Every signal that goes up can be turned back down. Squeaky G plugs in — and the vermin subnet awakens.</p>
+  <div class="pn"><h3>Panel 1</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Every signal that goes up can be turned back down.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/55a6a21a-2950-4483-9988-0af2db7844d6.png" alt=""><div class="fc">// uplink hub cathedral</div></div></div>
+  <div class="pn"><h3>Panel 2</h3><p class="dlg">"Let's season the signal."</p><div class="fr"><img src="https://cdn.abacus.ai/images/6f0c3e20-de90-4413-ba6a-b18f2c45e767.png" alt=""><div class="fc">// jacked into junction node</div></div></div>
+  <div class="pn"><h3>Panel 3</h3><p><strong>System VO:</strong> "Unscheduled firmware handshake… origin: <span class="sl">vermin subnet</span>."</p><div class="fr"><img src="https://cdn.abacus.ai/images/4360b4ce-645b-4c70-b501-c849a0eb6385.png" alt=""><div class="fc">// security HUD</div></div></div>
+  <div class="pn"><h3>Panel 4</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;One mouse is a mistake. A network is an uprising.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/a15ba93a-7df5-4410-8bfb-1a3c3e8dbcb8.png" alt=""><div class="fc">// glitch-rat army</div></div></div>
+  <div class="nb"><button class="btn sec" onclick="go('s3')">← Back Underground</button><button class="btn pink" onclick="go('s5')">Final Confrontation →</button></div>
+</section>
 
-        <!-- ---------- 3D NAV WHEEL PAGE ---------- -->
-        <section id="nav" class="page">
-            <h2>Holographic Nav Wheel</h2>
-            <div id="nav-wheel">
-                <div class="nav-segment" style="transform: rotateY(0deg) translateZ(150px);" onclick="navigate('title-card')">Title</div>
-                <div class="nav-segment" style="transform: rotateY(60deg) translateZ(150px);" onclick="navigate('scene-1')">Scene 1</div>
-                <div class="nav-segment" style="transform: rotateY(120deg) translateZ(150px);" onclick="navigate('scene-2')">Scene 2</div>
-                <div class="nav-segment" style="transform: rotateY(180deg) translateZ(150px);" onclick="navigate('scene-3')">Scene 3</div>
-                <div class="nav-segment" style="transform: rotateY(240deg) translateZ(150px);" onclick="navigate('scene-4')">Scene 4</div>
-                <div class="nav-segment" style="transform: rotateY(300deg) translateZ(150px);" onclick="navigate('scene-5')">Scene 5</div>
-            </div>
-            <footer>© DOC911 | All Rights Reserved</footer>
-        </section>
-    </main>
+<section id="s5" class="page">
+  <span class="st">// SCENE 05 // MAINFRAME CORE</span>
+  <h2 class="tw" data-tw="Crumbs in the Mainframe"></h2>
+  <p class="lead">This is where every order's born… and where one mouse rewrites the menu. Empires fall. Ecosystems adapt.</p>
+  <div class="pn"><h3>Panel 1</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;This is where every order's born…&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/ae82b280-37d8-4437-b5cb-3811360fa856.png" alt=""><div class="fc">// mainframe chamber</div></div></div>
+  <div class="pn"><h3>Panel 2</h3><p class="dlg">DOC911: "Access level: <span class="sl">UNAUTHORIZED ORGANIC</span>."<br>Squeaky G: "Guess I'm the exception handler."</p><div class="fr"><img src="https://cdn.abacus.ai/images/cc8a3e72-e021-4773-ae21-b0acffd2b6cc.png" alt=""><div class="fc">// cheese-code hack</div></div></div>
+  <div class="pn"><h3>Panel 3</h3><p><strong>VO:</strong> "Containment breach… redefining <span class="sl">ROOT TRUST</span>."</p><div class="fr"><img src="https://cdn.abacus.ai/images/2dbce94e-0c87-4a4f-89ba-10168fd81bc1.png" alt=""><div class="fc">// citywide grid taken</div></div></div>
+  <div class="pn"><h3>Panel 4 — Epilogue</h3><p><strong>Caption:</strong> <span class="cap" data-tw="&quot;Empires fall. Ecosystems adapt.&quot;"></span></p><div class="fr"><img src="https://cdn.abacus.ai/images/ac10410d-a3db-4cff-a958-f7d1d718417f.png" alt=""><div class="fc">// epilogue — root rodent</div></div></div>
+  <div class="nb"><button class="btn sec" onclick="go('s4')">← Back to Uplink</button><button class="btn pink" onclick="go('hero')">Return to Title →</button></div>
+</section>
 
-    <!-- ==========================  MODAL  ========================== -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h2>// Project R.A.T. Lab File</h2>
-            <p><strong>Subject:</strong> Recursive Autonomy Test – SQUEAKY G</p>
-            <p><strong>Objective:</strong> Introduce edible nanotech into server farm to spawn self-aware vermin-wire hybrid capable of insurgent creativity.</p>
-            <p><strong>Status:</strong> Test exceeded parameters; subject now re-writing own source.</p>
-            <p><strong>Containment:</strong> Impossible—he’s already in the groove.</p>
-            <p><strong>Clearance:</strong> DOC911 approved.</p>
-        </div>
-    </div>
+<section id="nav" class="page">
+  <span class="st">// STORY ORBIT</span>
+  <h2 class="tw" data-tw="3D Nav Wheel"></h2>
+  <p class="lead">Jump between key sequences by turning the orbit.</p>
+  <div id="wheel"><div class="wo">
+    <button class="ws" data-s="1" onclick="go('s1')">01</button>
+    <button class="ws" data-s="2" onclick="go('s2')">02</button>
+    <button class="ws" data-s="3" onclick="go('s3')">03</button>
+    <button class="ws" data-s="4" onclick="go('s4')">04</button>
+    <button class="ws" data-s="5" onclick="go('s5')">★</button>
+  </div></div>
+  <div class="nb"><button class="btn sec" onclick="go('hero')">Back to Title</button><button class="btn" onclick="go('s1')">Start Story Run →</button></div>
+</section>
 
-    <!-- ==========================  SCRIPTING  ========================== -->
-    <script>
-        /* ---------- ROUTING ---------- */
-        function navigate(route) {
-            document.querySelectorAll('section.page').forEach(s => s.classList.remove('active'));
-            const target = document.getElementById(route);
-            if (target) target.classList.add('active');
-            window.location.hash = route;
-        }
-        window.addEventListener('hashchange', () => {
-            const route = window.location.hash.slice(1) || 'title-card';
-            navigate(route);
-        });
+</main>
 
-        /* ---------- LOADER ---------- */
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loader = document.getElementById('loader');
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 600);
-            }, 2000);
-        });
+<div id="mb" class="mb"><div class="modal">
+  <h3>R.A.T. Lab File // CR-Δ-001</h3>
+  <p>Unofficial designation: <strong>SQUEAKY G</strong></p>
+  <pre>DOC911 / INCIDENT KERNEL
+&gt; Subject: Emergent rodent-autocode hybrid
+&gt; Origin: Sublevel 7 / Nutrient Spill
+&gt; Symptom: glitch pheromones in vent network
+&gt; Status: Containment... perforated.</pre>
+  <div class="mf"><button onclick="closeModal()">Acknowledge</button></div>
+</div></div>
 
-        /* ---------- PARTICLES ---------- */
-        function createParticle() {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            p.style.animationDelay = Math.random() * 5 + 's';
-            document.getElementById('particles').appendChild(p);
-            setTimeout(() => p.remove(), 20000);
-        }
-        setInterval(createParticle, 300);
+<div id="lb"><img id="lbi" alt=""></div>
 
-        /* ---------- MODAL ---------- */
-        function openModal() {
-            document.getElementById('modal').classList.add('active');
-        }
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-        }
+<div id="abar">
+  <button id="atog"><span id="adot"></span><span id="alab">Play Audio</span></button>
+  <span id="astat">muted</span>
+  <input id="vol" type="range" min="0" max="100" value="35">
+</div>
 
-        /* ---------- INITIAL ROUTE ---------- */
-        if (!window.location.hash) window.location.hash = 'title-card';
-    </script>
+<script>
+var audioEnabled=false,ac=null,masterGain=null,ambientGain=null;
+var SECTIONS=["hero","s1","s2","s3","s4","s5","nav"];
 
-    <!-- ==========================  TESTING LOG  ==========================  
-    - All tags closed & nested correctly ✔  
-    - No overlapping elements ✔  
-    - All routes functional ✔  
-    - Loader fades ✔  
-    - Particles spawn ✔  
-    - Modal opens/closes ✔  
-    - 3D wheel rotates ✔  
-    - Buttons glow ✔  
-    - Responsive layout ✔  
-    - Story content complete ✔  
-    - Easter egg present ✔  
-    ====================================================================== -->
-</body>
-</html>add the images to the website in the correct place panel1 goes into title page
+/* Loader */
+function hideLoader(){var l=document.getElementById("loader");if(l)l.classList.add("hidden")}
+setTimeout(hideLoader,1800);
+window.addEventListener("load",function(){setTimeout(hideLoader,1200)});
+
+/* Boot log */
+var logLines=["> mounting /dev/wires...","> spillover: NANO-CHEESE detected","> bio-handshake: SQUEAK","> kernel ready."];
+var li=0,llog=document.getElementById("llog");
+var logT=setInterval(function(){li++;if(li>=logLines.length){clearInterval(logT);return}llog.textContent=logLines[li]},420);
+
+/* Particles */
+(function(){var c=document.getElementById("particles");
+function spawn(kind){var p=document.createElement("div");p.className="p"+(kind?" "+kind:"");
+  p.style.left=Math.random()*innerWidth+"px";p.style.top=(kind==="g"?-40:innerHeight+20)+"px";
+  p.style.animationDuration=(kind==="g"?3+Math.random()*3:6+Math.random()*6)+"s";
+  c.appendChild(p);setTimeout(function(){p.remove()},12000)}
+for(var i=0;i<30;i++)spawn();for(var i=0;i<10;i++)spawn("g");for(var i=0;i<4;i++)spawn("c");
+setInterval(function(){spawn()},800);setInterval(function(){spawn("g")},1200);setInterval(function(){spawn("c")},1800);
+})();
+
+/* Hero typewriter */
+var tagText="In the darkest corner of DOC911's biotech under-lab, a tiny spark lit the fuse of revolution... one crumb. one wire. one squeak heard around the world.";
+var tagEl=document.getElementById("tagline"),ti=0;
+function typeTag(){if(ti<=tagText.length){tagEl.innerHTML=tagText.slice(0,ti)+'<span class="cur"></span>';ti++;setTimeout(typeTag,30+Math.random()*40)}}
+setTimeout(typeTag,2200);
+
+/* Heading typewriter (per-section, triggered on reveal) */
+function typeHeading(el){
+  if(el.dataset.typed==="1")return;
+  el.dataset.typed="1";
+  var full=el.getAttribute("data-tw")||"";
+  // decode entities
+  var tmp=document.createElement("textarea");tmp.innerHTML=full;full=tmp.value;
+  var idx=0;
+  el.innerHTML='<span class="twt"></span><span class="twc"></span>';
+  var span=el.querySelector(".twt");
+  if(audioEnabled)blip(900+Math.random()*200,0.03,0.04);
+  (function tick(){
+    if(idx<=full.length){
+      span.textContent=full.slice(0,idx);
+      idx++;
+      if(audioEnabled&&idx%2===0)blip(1400+Math.random()*600,0.02,0.025,"square");
+      setTimeout(tick,55+Math.random()*45);
+    } else {
+      setTimeout(function(){el.classList.add("done")},900);
+    }
+  })();
+}
+
+/* Nav */
+function go(id){var t=document.getElementById(id);if(!t)return;t.scrollIntoView({behavior:"smooth",block:"start"});playStinger(id)}
+
+/* Scroll progress + active nav */
+var navBtns=document.querySelectorAll("#snav button");
+var pbar=document.getElementById("progress");
+function onScroll(){var sc=scrollY,dh=document.documentElement.scrollHeight-innerHeight;
+  pbar.style.width=Math.min(100,(sc/dh)*100)+"%";
+  var cur=SECTIONS[0];for(var i=0;i<SECTIONS.length;i++){var el=document.getElementById(SECTIONS[i]);if(!el)continue;
+    var r=el.getBoundingClientRect();if(r.top<innerHeight*0.4)cur=SECTIONS[i]}
+  for(var j=0;j<navBtns.length;j++){navBtns[j].classList.toggle("active",navBtns[j].dataset.t===cur)}}
+addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+/* Caption typewriter (per .cap span) */
+function typeCap(el,delay){
+  if(el.dataset.typed==="1")return;
+  el.dataset.typed="1";
+  var full=el.getAttribute("data-tw")||"";
+  var tmp=document.createElement("textarea");tmp.innerHTML=full;full=tmp.value;
+  el.innerHTML='<span class="twt"></span><span class="twc"></span>';
+  var span=el.querySelector(".twt");
+  var idx=0;
+  setTimeout(function go(){
+    if(idx<=full.length){
+      span.textContent=full.slice(0,idx);
+      idx++;
+      if(audioEnabled&&idx%3===0)blip(1200+Math.random()*500,0.018,0.02,"square");
+      setTimeout(go,38+Math.random()*42);
+    } else {
+      setTimeout(function(){el.classList.add("done")},700);
+    }
+  },delay||0);
+}
+
+/* Reveal + heading & caption typewriter trigger */
+var io=new IntersectionObserver(function(es){es.forEach(function(e){
+  if(e.isIntersecting){
+    e.target.classList.add("vis");
+    var h=e.target.querySelector(".tw");
+    if(h)setTimeout(function(){typeHeading(h)},300);
+    var caps=e.target.querySelectorAll(".cap");
+    caps.forEach(function(c,i){typeCap(c,1200+i*350)});
+    if(audioEnabled)playStinger(e.target.id);
+  }
+})},{threshold:0.15});
+document.querySelectorAll("section.page").forEach(function(s){io.observe(s)});
+
+/* Keyboard */
+addEventListener("keydown",function(e){if(e.target.matches("input,textarea"))return;
+  var cur=SECTIONS[0];for(var i=0;i<SECTIONS.length;i++){var el=document.getElementById(SECTIONS[i]);if(!el)continue;
+    var r=el.getBoundingClientRect();if(r.top<innerHeight*0.4)cur=SECTIONS[i]}
+  var idx=SECTIONS.indexOf(cur);
+  if(e.key==="ArrowDown"||e.key==="PageDown"){e.preventDefault();if(idx<SECTIONS.length-1)go(SECTIONS[idx+1])}
+  if(e.key==="ArrowUp"||e.key==="PageUp"){e.preventDefault();if(idx>0)go(SECTIONS[idx-1])}
+  if(e.key==="Escape"){closeModal();closeLB()}});
+
+/* Modal */
+var mbE=document.getElementById("mb");
+function openModal(){mbE.classList.add("act")}
+function closeModal(){mbE.classList.remove("act")}
+mbE.addEventListener("click",function(e){if(e.target===mbE)closeModal()});
+
+/* Lightbox */
+var lb=document.getElementById("lb"),lbi=document.getElementById("lbi");
+document.querySelectorAll(".fr img").forEach(function(img){img.addEventListener("click",function(){lbi.src=img.src;lb.classList.add("act")})});
+lb.addEventListener("click",closeLB);
+function closeLB(){lb.classList.remove("act")}
+
+/* Audio */
+var atog=document.getElementById("atog"),adot=document.getElementById("adot"),alab=document.getElementById("alab"),astat=document.getElementById("astat"),volS=document.getElementById("vol");
+
+function initAudio(){
+  ac=new (window.AudioContext||window.webkitAudioContext)();
+  masterGain=ac.createGain();masterGain.gain.value=parseFloat(volS.value)/100;
+  var mf=ac.createBiquadFilter();mf.type="lowpass";mf.frequency.value=3200;
+  masterGain.connect(mf);mf.connect(ac.destination);
+  ambientGain=ac.createGain();ambientGain.gain.value=0;
+  var padFilter=ac.createBiquadFilter();padFilter.type="lowpass";padFilter.frequency.value=600;padFilter.Q.value=4;
+  var lfo=ac.createOscillator();var lfoGain=ac.createGain();lfo.frequency.value=0.07;lfoGain.gain.value=350;
+  lfo.connect(lfoGain);lfoGain.connect(padFilter.frequency);lfo.start();
+  [55,82.4,110,164.8].forEach(function(f){
+    var o1=ac.createOscillator();o1.type="sawtooth";o1.frequency.value=f;o1.detune.value=-7;
+    var o2=ac.createOscillator();o2.type="sawtooth";o2.frequency.value=f;o2.detune.value=7;
+    var g=ac.createGain();g.gain.value=0.08;
+    o1.connect(g);o2.connect(g);g.connect(padFilter);o1.start();o2.start();
+  });
+  padFilter.connect(ambientGain);ambientGain.connect(masterGain);
+  var beat=ac.createOscillator();beat.type="sine";beat.frequency.value=41.2;
+  var beatG=ac.createGain();beatG.gain.value=0;beat.connect(beatG);beatG.connect(masterGain);beat.start();
+  setInterval(function(){if(!audioEnabled)return;var t=ac.currentTime;
+    beatG.gain.cancelScheduledValues(t);beatG.gain.setValueAtTime(0,t);
+    beatG.gain.linearRampToValueAtTime(0.3,t+0.04);beatG.gain.exponentialRampToValueAtTime(0.001,t+0.6)},2400);
+  setInterval(function(){if(audioEnabled&&Math.random()>0.65)blip(800+Math.random()*1800,0.05,0.04)},900);
+}
+function blip(freq,dur,vol,type){if(!ac)return;vol=vol||0.06;type=type||"square";
+  var o=ac.createOscillator();o.type=type;o.frequency.value=freq;
+  var g=ac.createGain();g.gain.value=0;o.connect(g);g.connect(masterGain);
+  var t=ac.currentTime;g.gain.linearRampToValueAtTime(vol,t+0.005);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.start(t);o.stop(t+dur+0.05)}
+function sweep(f1,f2,dur,vol){if(!ac)return;vol=vol||0.08;
+  var o=ac.createOscillator();o.type="sawtooth";var g=ac.createGain();g.gain.value=0;
+  var fl=ac.createBiquadFilter();fl.type="bandpass";fl.frequency.value=900;
+  o.connect(fl);fl.connect(g);g.connect(masterGain);
+  var t=ac.currentTime;o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.linearRampToValueAtTime(vol,t+0.03);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.start(t);o.stop(t+dur+0.05)}
+var stingers={
+  s1:function(){blip(1200,0.08,0.1);setTimeout(function(){blip(800,0.12,0.08,"triangle")},120)},
+  s2:function(){sweep(200,1400,0.5,0.08);setTimeout(function(){blip(1800,0.05,0.07)},200)},
+  s3:function(){blip(330,0.4,0.07,"sawtooth");setTimeout(function(){blip(495,0.4,0.06,"sawtooth")},60)},
+  s4:function(){sweep(80,600,0.8,0.1)},
+  s5:function(){sweep(1200,80,0.4,0.12)},
+  hero:function(){blip(880,0.1,0.08,"sine")},
+  nav:function(){blip(660,0.05,0.05)}
+};
+var lastSt=0;
+function playStinger(id){if(!audioEnabled)return;var now=Date.now();if(now-lastSt<400)return;lastSt=now;if(stingers[id])stingers[id]()}
+function setAudio(on){if(on&&!ac)initAudio();audioEnabled=on;
+  if(on){ac.resume();ambientGain.gain.cancelScheduledValues(ac.currentTime);ambientGain.gain.linearRampToValueAtTime(1,ac.currentTime+1.2);
+    astat.textContent="signal online";alab.textContent="Mute";adot.classList.add("act")}
+  else{if(ambientGain){ambientGain.gain.cancelScheduledValues(ac.currentTime);ambientGain.gain.linearRampToValueAtTime(0,ac.currentTime+0.6)}
+    astat.textContent="muted";alab.textContent="Play Audio";adot.classList.remove("act")}}
+atog.addEventListener("click",function(){setAudio(!audioEnabled)});
+volS.addEventListener("input",function(){if(masterGain)masterGain.gain.value=parseFloat(volS.value)/100});
+document.querySelectorAll(".btn, nav button, .ws, .egg").forEach(function(b){b.addEventListener("click",function(){if(audioEnabled)blip(1200+Math.random()*400,0.04,0.05)})});
+</script>
+</body></html>
